@@ -1,0 +1,15 @@
+telethon
+pandas
+reportlab
+matplotlib
+pytz
+tzlocal
+Pillow
+folium
+spaCy
+datetime
+colorama
+cryptg
+validate_email_address
+networkx
+openpyxl
