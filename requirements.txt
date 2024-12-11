@@ -13,3 +13,5 @@ cryptg
 validate_email_address
 networkx
 openpyxl
+transformers
+beautifulsoup4
