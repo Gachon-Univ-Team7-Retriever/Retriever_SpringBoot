@@ -7,18 +7,7 @@ with open(html_file_path, "r", encoding="utf-8") as file:
 
 soup = BeautifulSoup(html, "html.parser")
 
-# 텍스트 블록 추출
-def extract_text_blocks(element):
-    text_blocks = []
-    for tag in element.descendants:  # 모든 하위 태그를 순회
-        if tag.string:  # 텍스트가 있는 경우
-            text = tag.string.strip()
-            if text:  # 공백이 아닌 텍스트만 추가
-                text_blocks.append(text)
-    return text_blocks
-
 # HTML 문서에서 텍스트 블록 추출
-text_blocks = extract_text_blocks(soup)
 text_blocks = soup.get_text(separator=" ").split("\n")
 text_blocks = [block.strip() for block in text_blocks if block.strip()]  # 빈 줄 제거
 
