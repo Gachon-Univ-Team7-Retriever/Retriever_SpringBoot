@@ -40,6 +40,8 @@ async def scrape_channel_content(channel_name):
                             print(f"{Fore.GREEN}Downloaded media: {media_file_path}{Style.RESET_ALL}")
                         except Exception as e:
                             print(f"{Fore.RED}Failed to download media: {e}{Style.RESET_ALL}")
+                # 메시지 보낸 날짜 및 시간
+                message_date = post.date.strftime('%Y-%m-%d %H:%M:%S')  # 'YYYY-MM-DD HH:MM:SS' 포맷으로 저장
 
                 if sender := post.sender:
                     if isinstance(sender, types.User):
@@ -61,7 +63,7 @@ async def scrape_channel_content(channel_name):
                 views = post.views or "N/A"
                 message_url = f"https://t.me/{channel_name}/{post.id}"
 
-                content.append((text, username, first_name, last_name, user_id, views, message_url, media_file_path))
+                content.append((message_date, text, username, first_name, last_name, user_id, views, message_url, media_file_path))
 
                 if post_count % 10 == 0:
                     print(
@@ -93,7 +95,7 @@ async def main():
         content = await scrape_channel_content(channel_name)
 
         if content:
-            df = pd.DataFrame(content, columns=['Text', 'Username', 'First Name', 'Last Name', 'User ID', 'Views',
+            df = pd.DataFrame(content, columns=['Datetime', 'Text', 'Username', 'First Name', 'Last Name', 'User ID', 'Views',
                                                 'Message URL', 'Media File Path'])
             try:
                 df.to_csv(csv_filename, index=False)
