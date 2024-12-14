@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 
 import preprocessor.extractor
-import Telerecon.channelscraper
 
 app = Flask(__name__)
 
@@ -35,7 +34,7 @@ def scrape():
     channel_name = data['channel_name']
 
     try:
-        content = Telerecon.channelscraper.main(channel_name)
+        content = Modules.Telerecon.channelscraper.main(channel_name)
         return jsonify(content), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
