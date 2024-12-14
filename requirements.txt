@@ -15,3 +15,4 @@ networkx
 openpyxl
 transformers
 beautifulsoup4
+Flask
