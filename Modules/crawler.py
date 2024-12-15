@@ -7,7 +7,7 @@ import os
 import requests
 
 # 검색 결과에서 URL을 가져오는 함수
-def get_search_result_urls(driver, query, max_results=50):
+def get_search_result_urls(driver, query, max_results=42):
     search_url = "https://www.google.com"
     driver.get(search_url)
 
@@ -41,49 +41,59 @@ def get_search_result_urls(driver, query, max_results=50):
 
     return urls
 
-# 각 URL의 HTML 저장 함수
-def save_html_from_url(url, folder_path, file_name):
+def get_html_from_url(url: str) -> str:
     try:
         response = requests.get(url)
         response.raise_for_status()
         html_text = response.text
-
-        # 폴더가 없으면 생성
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        file_path = os.path.join(folder_path, file_name)
-        with open(file_path, 'w', encoding='utf-8') as file:
-            file.write(html_text)
-        print(f"{file_name} 저장 완료!")
+        return html_text
     except requests.RequestException as e:
         print(f"URL 요청 실패 ({url}): {e}")
+        return ""
+
+# 각 URL의 HTML 저장 함수
+def save_html(html:str, folder_path:str, file_name:str) -> None:
+    # 폴더가 없으면 생성
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    file_path = os.path.join(folder_path, file_name)
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(html)
+    print(f"{file_name} 저장 완료!")
 
 # 메인 흐름 제어
-def main():
-    query = input("검색어를 입력하세요: ")
-
+def main(query, save_file=False) -> list:
     # 드라이버 생성
     driver = webdriver.Chrome()
 
+    # 반환할 결과 배열
+    result = []
+
     try:
-        urls = get_search_result_urls(driver, query, max_results=50)
-
-        if not urls:
-            print("검색 결과가 없습니다.")
-            return
-
-        print(f"{len(urls)}개의 URL을 찾았습니다. HTML 파일 저장을 시작합니다...")
-
-        folder_path = "html_files"
-        for idx, url in enumerate(urls, start=1):
-            file_name = f"web_{idx}.html"
-            save_html_from_url(url, folder_path, file_name)
-            time.sleep(2)  # 요청 간격 조정
-
-        print("모든 HTML 파일 저장이 완료되었습니다!")
+        urls = get_search_result_urls(driver, query, max_results=10)
     finally:
         driver.quit()
+
+    if not urls:
+        print("검색 결과가 없습니다.")
+    else:
+        print(f"{len(urls)}개의 URL을 찾았습니다.")
+
+    for idx, url in enumerate(urls, start=1):
+        html = get_html_from_url(url)
+
+        print(f"url:{url}에 대한 결과 수신.")
+        result.append({
+            "url": url,
+            "html": html,
+        })
+        if save_file:
+            file_name = f"web_{idx}.html"
+            save_html(html, "html_files", file_name)
+        time.sleep(2)  # 요청 간격 조정
+
+    return result
 
 # 프로그램 실행
 if __name__ == "__main__":

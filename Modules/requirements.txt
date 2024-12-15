@@ -16,3 +16,4 @@ openpyxl
 transformers
 beautifulsoup4
 Flask
+selenium
