@@ -6,7 +6,7 @@ import com.team7.retriever.repository.ChInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ public class ChInfoService {
     }
 
     // test code
-    public void addChInfo (String id, String name, String link, String desc, Date createdAt, Date updatedAt, Date deletedAt) {
+    public void addChInfo (String id, String name, String link, String desc, LocalDateTime createdAt, LocalDateTime updatedAt, LocalDateTime deletedAt) {
         ChInfo chInfo = new ChInfo(id, name, link, desc, createdAt, updatedAt, deletedAt);
         // 위 코드를 setter 쓰는 걸로 수정하면 됨
         // addChInfo 자체에 들어있는 파라미터도 삭제하고, 읽어온 데이터로 대체하면 됨
