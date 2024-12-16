@@ -3,6 +3,8 @@ package com.team7.retriever.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "channel_data")
 public class ChData {
     @Id
@@ -15,6 +17,7 @@ public class ChData {
     private String msgUrl;
     private String text;
     private String image;
+    private LocalDateTime timestamp;
 
     // Getters & setters
     public String getId() {
@@ -87,5 +90,13 @@ public class ChData {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

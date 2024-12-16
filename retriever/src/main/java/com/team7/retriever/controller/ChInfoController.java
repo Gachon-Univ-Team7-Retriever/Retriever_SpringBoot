@@ -6,7 +6,7 @@ import com.team7.retriever.service.ChInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +19,7 @@ public class ChInfoController {
     // api test (테스트용 - 채널 정보 직접 생성, 아래 데이터)
     @PostMapping("/addChInfo")
     public String addChInfo(@RequestBody ChInfo chInfo) {
-        Date date = new Date();
+        LocalDateTime date = LocalDateTime.now();
         infoService.addChInfo("api test", "api test updated name", "api test link", "this is api test", date, date, date);
         return "success add ch info";
     }
