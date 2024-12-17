@@ -66,11 +66,11 @@ public class ChScrapeService {
             LocalDateTime currentDateTime = LocalDateTime.now();
 
             ChInfo chInfo = new ChInfo();
-            chInfo.setId("t.me/"+channelName);
+            chInfo.setId(channelName);
             chInfo.setName(channelName);
             chInfo.setLink("t.me/"+channelName);
             chInfo.setDescription(null);
-            chInfo.setCreatedAt(null);
+            chInfo.setCreatedAt(currentDateTime);
             chInfo.setUpdatedAt(currentDateTime);
             chInfo.setDeletedAt(null);
             chInfoRepository.save(chInfo);
@@ -82,8 +82,8 @@ public class ChScrapeService {
                     // 각 항목에 대해 ChData 객체 생성
                     ChData chData = new ChData();
 
-                    // channelId 생성 (t.me/ + channelName)
-                    chData.setChannelId("t.me/" + channelName);
+                    // channelId 생성 (channelName)
+                    chData.setChannelId(channelName);
 
                     // ***
                     // 날짜 형식 파싱 (yyyy-MM-dd HH:mm:ss 형식 처리)
