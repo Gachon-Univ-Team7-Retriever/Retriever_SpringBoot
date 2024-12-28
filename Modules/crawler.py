@@ -27,8 +27,8 @@ def get_search_result_urls(driver, query, max_results=42):
             href = link.get_attribute("href")
             if href and "http" in href and "google.com" not in href:
                 urls.append(href)
-                if len(urls) >= max_results:
-                    break
+            if len(urls) >= max_results:
+                break
 
         # 다음 페이지 버튼 클릭
         try:
@@ -63,24 +63,32 @@ def save_html(html:str, folder_path:str, file_name:str) -> None:
     print(f"{file_name} 저장 완료!")
 
 # 메인 흐름 제어
-def main(query, save_file=False) -> list:
+def main(queries, save_file=False) -> list: # 만약 로컬 파일에 결과를 저장하고 싶다면 save_file을 True로 변경
+    # 중복 제거를 위한 집합 사용
+    all_urls = set()
+
     # 드라이버 생성
     driver = webdriver.Chrome()
 
     # 반환할 결과 배열
     result = []
 
+    # 모든 검색어에 대한 검색 수행
     try:
-        urls = get_search_result_urls(driver, query, max_results=10)
+        for query in queries:
+            print(f"\n'{query}'에 대한 검색 시작...")
+            urls = get_search_result_urls(driver, query, max_results=10)
+            all_urls.update(urls)  # URL 합집합
     finally:
         driver.quit()
 
-    if not urls:
+    if not all_urls:
         print("검색 결과가 없습니다.")
     else:
-        print(f"{len(urls)}개의 URL을 찾았습니다.")
+        print(f"{len(all_urls)}개의 URL을 찾았습니다.")
 
-    for idx, url in enumerate(urls, start=1):
+    # 검색한 결과를 json 형식으로 정리해서 반환
+    for idx, url in enumerate(all_urls, start=1):
         html = get_html_from_url(url)
 
         print(f"url:{url}에 대한 결과 수신.")
@@ -88,6 +96,8 @@ def main(query, save_file=False) -> list:
             "url": url,
             "html": html,
         })
+
+        # save_file=True라면 로컬 파일에 검색 결과 html 저장
         if save_file:
             file_name = f"web_{idx}.html"
             save_html(html, "html_files", file_name)
@@ -97,4 +107,4 @@ def main(query, save_file=False) -> list:
 
 # 프로그램 실행
 if __name__ == "__main__":
-    main()
+    main(["t.me 아이스", "t.me 떨"])

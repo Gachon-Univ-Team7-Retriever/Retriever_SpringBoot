@@ -41,14 +41,15 @@ def scrape():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/crawl/google', methods=["GET"])
+@app.route('/crawl/google', methods=["POST"])
 def crawl():
-    data = request.args
-    if not data or 'query' not in data:
-        return jsonify({"error": "Please provide 'query' in the request arguments."}), 400
+    data = request.json
+    if not data or 'queries' not in data:
+        return jsonify({"error": "Please provide 'queries' in the request arguments."}), 400
 
     try:
-        result = crawler.main(data['query'])
+        result = crawler.main(data['queries'])
+        print(result)
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

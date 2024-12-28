@@ -2331,9 +2331,12 @@ test_set = [
     },
     {
         'url': "http://127.0.0.1:5000/crawl/google",
-        'method': "GET",
-        'params': {
-            "query": "t.me 아이스"
+        'method': "POST",
+        'data': {
+            "queries": [
+                "t.me 아이스",
+                "t.me 떨"
+            ]
         }
     }
 ]
