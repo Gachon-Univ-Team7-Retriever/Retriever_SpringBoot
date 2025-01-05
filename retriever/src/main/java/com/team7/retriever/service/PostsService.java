@@ -19,6 +19,11 @@ public class PostsService {
         return PostsRepository.findAll();
     }
 
+    // 특정 게시글 ID로 조회
+    public Posts getPostById(String id) {
+        return PostsRepository.findById(id).orElse(null);
+    }
+
     // 태그로 조회
     public List<Posts> getPostsByTag(String tag) {
         return PostsRepository.findByTag(tag);
