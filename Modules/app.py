@@ -46,10 +46,11 @@ def crawl():
     data = request.json
     if not data or 'queries' not in data:
         return jsonify({"error": "Please provide 'queries' in the request arguments."}), 400
+    if not data or 'max_results' not in data:
+        return jsonify({"error": "Please provide 'max_results' in the request arguments."}), 400
 
     try:
-        result = crawler.main(data['queries'])
-        print(result)
+        result = crawler.main(data['queries'], data['max_results'])
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

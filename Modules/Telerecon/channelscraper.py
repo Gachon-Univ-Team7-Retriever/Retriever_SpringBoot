@@ -4,6 +4,12 @@ from . import details as ds
 import base64
 from telethon.sync import TelegramClient, types
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
+from telethon.tl.functions.channels import JoinChannelRequest
+from telethon.tl.functions.messages import ImportChatInviteRequest
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
+from telethon.errors import UserAlreadyParticipantError
+
 import pandas as pd
 from colorama import Fore, Style
 
@@ -11,11 +17,37 @@ api_id = ds.apiID
 api_hash = ds.apiHash
 phone = ds.number
 
-
-async def scrape_channel_content(channel_name):
+async def scrape_channel_content(invite_link):
     async with TelegramClient(phone, api_id, api_hash) as client:
         try:
-            entity = await client.get_entity(channel_name)
+            # 초대 링크 처리
+            if invite_link.startswith("+"):
+                invite_hash = invite_link.split("+")[1]
+                try:
+                    # 초대 링크 유효성 검사 및 채널 정보 가져오기
+                    invite_info = await client(CheckChatInviteRequest(invite_hash))
+
+                    if isinstance(invite_info, types.ChatInvite):
+                        # 초대 링크가 유효하지만 아직 참여하지 않은 경우
+                        print(f"{Fore.GREEN}Joining the channel via invite link...{Style.RESET_ALL}")
+                        entity = await client(ImportChatInviteRequest(invite_hash))
+                        print(f"{Fore.GREEN}Successfully joined the channel via invite link.{Style.RESET_ALL}")
+                    elif isinstance(invite_info, types.ChatInviteAlready):
+                        # 이미 채널에 참여 중인 경우
+                        entity = await client.get_entity(invite_info.chat)
+                        print(f"{Fore.YELLOW}Already a participant in the channel. Retrieved entity.{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.RED}Failed to process invite link: {e}{Style.RESET_ALL}")
+                    return []
+            else:
+                # 일반적인 채널 이름 처리
+                entity = await client.get_entity(invite_link)
+
+            if not entity:
+                print(f"{Fore.RED}Failed to retrieve entity for the channel.{Style.RESET_ALL}")
+                return []
+
+            # 메시지 스크랩
             content = []
             post_count = 0
 
@@ -32,14 +64,13 @@ async def scrape_channel_content(channel_name):
                             media_bytes = await client.download_media(
                                 message=post,
                                 file=bytes
-                            ) # media를 다운로드하는 코드해서 바이트 객체로 저장하는 코드.
-                            print(f"{Fore.GREEN}Downloaded media.{Style.RESET_ALL}")
-                            # 다운로드한 media를 base64로 encode
+                            )
                             media_base64 = base64.b64encode(media_bytes).decode('utf-8')
                         except Exception as e:
                             print(f"{Fore.RED}Failed to download media: {e}{Style.RESET_ALL}")
+
                 # 메시지 보낸 날짜 및 시간
-                message_date = post.date.strftime('%Y-%m-%d %H:%M:%S')  # 'YYYY-MM-DD HH:MM:SS' 포맷으로 저장
+                message_date = post.date.strftime('%Y-%m-%d %H:%M:%S')
 
                 # 기본적으로 모두 값 없음으로 초기화
                 username = "N/A"
@@ -55,7 +86,7 @@ async def scrape_channel_content(channel_name):
                         user_id = sender.id
 
                 views = post.views or "N/A"
-                message_url = f"https://t.me/{channel_name}/{post.id}"
+                message_url = f"https://t.me/{invite_link.split('+')[-1]}/{post.id}"
 
                 content.append({
                     "date": message_date,
@@ -71,7 +102,7 @@ async def scrape_channel_content(channel_name):
 
                 if post_count % 10 == 0:
                     print(
-                        f"{Fore.WHITE}{post_count} Posts scraped in {Fore.LIGHTYELLOW_EX}{channel_name}{Style.RESET_ALL}")
+                        f"{Fore.WHITE}{post_count} Posts scraped in {Fore.LIGHTYELLOW_EX}{invite_link}{Style.RESET_ALL}")
 
             return content
 
