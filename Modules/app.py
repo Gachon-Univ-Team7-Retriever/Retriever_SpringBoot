@@ -28,7 +28,7 @@ def extract_text_block():
 
 
 @app.route('/telegram/channel/scrape', methods=['POST'])
-def scrape():
+def scrape_channel():
     data = request.json
     if not data or 'channel_name' not in data:
         return jsonify({"error": "Please provide 'channel_name' in the JSON request body."}), 400
@@ -36,8 +36,21 @@ def scrape():
     channel_name = data['channel_name']
 
     try:
-        content = Telerecon.channelscraper.main(channel_name)
+        content = Telerecon.channelscraper.scrape(channel_name)
         return jsonify(content), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/telegram/channel/check', methods=['POST'])
+def check_channel():
+    data = request.json
+    if not data or 'channel_name' not in data:
+        return jsonify({"error": "Please provide 'channel_name' in the JSON request body."}), 400
+
+    channel_name = data['channel_name']
+
+    try:
+        return jsonify({"suspicious": Telerecon.channelscraper.check(channel_name)}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

@@ -9,6 +9,7 @@ def extract_text_blocks_from_html(html) -> list:
 
     return text_blocks
 
+
 import json
 
 # json 파일에서 마약 은어/약어 로드(추후 데이터베이스에서 로드하도록 변경)
@@ -36,6 +37,7 @@ def extract_promotion_content(html: str) -> None | str:
 
 import re
 
+# 텍스트에서 텔레그램 링크들을 식별해서 리스트로 묶어 반환하는 함수
 def extract_telegram_links(text: str) -> list[str]:
     # joinchat/를 "+"로 변환
     text_modified = re.sub(r"(https?://)?t\.me/joinchat/", r"\1t.me/+", text)
@@ -45,22 +47,5 @@ def extract_telegram_links(text: str) -> list[str]:
     # 정규식으로 텔레그램 주소 추출
     return re.findall(telegram_pattern, text_modified)
 
-
-def determine_telegram_channel(chats: dict) -> bool:
-    # 은어/약어 사전에 맞는 채팅들을 필터링
-    filtered_chats = [chat['text'] for chat in chats if any(keyword in chat['text'] for keyword in dictionary)]
-    return len(filtered_chats) >= 5
-
-
-# html_file_path = "/sample_webpage.html"
-#
-# with open(html_file_path, "r", encoding="utf-8") as file:
-#     sample_html = file.read()  # 파일 내용을 문자열로 읽음
-
-
-# sample_text_blocks = extract_text_blocks_from_html(sample_html)
-# print(sample_text_blocks)
-# print(extract_by_length(sample_text_blocks))
-
 if __name__ == "__main__":
-    print(extract_telegram_link("http://t.me/+sample"))
+    print(extract_telegram_links("http://t.me/+sample"))
