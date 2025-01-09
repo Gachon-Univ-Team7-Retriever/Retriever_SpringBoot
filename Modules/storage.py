@@ -2,8 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
-import Telerecon.channelscraper
-import preprocessor.extractor
+import preprocess.extractor
 import time
 import os
 import requests
@@ -35,7 +34,7 @@ def get_search_result(driver, query, max_results=42) -> dict:
             href = link.get_attribute("href")
             print(href)
             if href:
-                extract_result = preprocessor.extractor.extract_telegram_links(href)
+                extract_result = preprocess.extractor.extract_telegram_links(href)
                 if extract_result:
                     channel_name = extract_result[0].lower()
                     telegrams.append(channel_name)

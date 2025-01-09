@@ -11,13 +11,13 @@ if __name__ == '__main__':
         "queries": [
             "t.me 아이스",
             "t.me 떨",
-            # "t.me 캔디",
-            # "t.me LSD",
-            # "t.me 케타민",
-            # "텔레 떨 판매",
-            # "텔레 아이스 판매",
+            "t.me 캔디",
+            "t.me LSD",
+            "t.me 케타민",
+            "텔레 떨 판매",
+            "텔레 아이스 판매",
         ],
-        "max_results": 10
+        "max_results": 100
     })
 
     test_result['telegrams'] = response.json()['telegrams']
