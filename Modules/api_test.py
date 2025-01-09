@@ -2324,16 +2324,16 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
-            "channel_name": "+rFf0i3HFC4tiOGE1"
+            "channel_name": "Hyde_Sandbox"
         }
     },
     {
         'enabled': False,
-        'url': "http://127.0.0.1:5000/telegram/channel/check",
+        'url': "http://127.0.0.1:5000/telegram/channel/check-suspicious",
         'method': "POST",
         'data': {
             "channel_name": "+rFf0i3HFC4tiOGE1"
@@ -2341,14 +2341,26 @@ test_set = [
     },
     {
         'enabled': False,
-        'url': "http://127.0.0.1:5000/crawl/google",
+        'url': "http://127.0.0.1:5000/crawl/links",
         'method': "POST",
         'data': {
             "queries": [
                 "t.me 아이스",
-                "t.me 떨"
+                "t.me 떨",
+                "t.me 케이",
+                "t.me LSD",
+                "t.me 캔디",
+                "t.me 빙두"
             ],
-            "max_results": 3
+            "max_results": 10
+        }
+    },
+    {
+        'enabled': True,
+        'url': "http://127.0.0.1:5000/crawl/html",
+        'method': "POST",
+        'data': {
+            "link": "https://www.teia.co.kr/25/?q=YToyOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjtzOjQ6InBhZ2UiO2k6MTI7fQ%3D%3D&bmode=view&idx=139766712&t=board&category=0JV5F0VX73"
         }
     }
 ]

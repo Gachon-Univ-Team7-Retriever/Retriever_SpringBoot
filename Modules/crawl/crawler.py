@@ -1,10 +1,4 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-import Telerecon.channelscraper
-import preprocessor.extractor
-import time
+from preprocess import extractor
 import os
 import requests
 
@@ -39,7 +33,7 @@ def google_search(query:str, num_results:int=10, api_key:str=API_KEY, search_eng
         # 검색 결과가 있을 경우 검색 결과로 나온 링크를 순회
         for item in data["items"]:
             link = item["link"]
-            extracted_telegram_links = preprocessor.extractor.extract_telegram_links(link)
+            extracted_telegram_links = extractor.extract_telegram_links(link)
             # 추출된 텔레그램 링크가 있을 경우 텔레그램 항목에 추가
             if extracted_telegram_links:
                 channel_name = extracted_telegram_links[0].lower()
@@ -56,6 +50,31 @@ def google_search(query:str, num_results:int=10, api_key:str=API_KEY, search_eng
         "telegrams": telegrams
     }
 
+
+# 통합 웹 검색
+def search_links(queries: list[str], max_results: int) -> dict:  # 만약 로컬 파일에 결과를 저장하고 싶다면 save_file을 True로 변경
+    # 중복 제거를 위한 집합 사용
+    all_urls, all_telegrams = set(), set()
+
+    # 모든 검색어에 대한 검색 수행
+    for query in queries:
+        print(f"\n'{query}'에 대한 검색 시작...")
+        search_result = google_search(query, max_results)
+        all_urls.update(search_result['urls'])  # URL 합집합
+        all_telegrams.update(search_result['telegrams'])  # 텔레그램 채널 이름 합집합
+
+    if not all_urls:
+        print("검색 결과가 없습니다.")
+    else:
+        print(f"{len(all_urls)}개의 URL을 찾았습니다.")
+
+    # URL들과 텔레그램 채널 결과를 합쳐서 딕셔너리로 결과 반환
+    return {
+        'google': list(all_urls),
+        'telegrams': list(all_telegrams)
+    }
+
+
 def get_html_from_url(url: str) -> str:
     try:
         response = requests.get(url, headers=headers)
@@ -66,7 +85,7 @@ def get_html_from_url(url: str) -> str:
         print(f"URL 요청 실패 ({url}): {e}")
         return ""
 
-# 각 URL의 HTML 저장 함수
+# 각 URL의 HTML 저장 함수(현재 미사용)
 def save_html(html:str, folder_path:str, file_name:str) -> None:
     # 폴더가 없으면 생성
     if not os.path.exists(folder_path):
@@ -76,51 +95,3 @@ def save_html(html:str, folder_path:str, file_name:str) -> None:
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(html)
     print(f"{file_name} 저장 완료!")
-
-# 메인 흐름 제어
-def main(queries:list[str], max_results:int, save_file:bool=False) -> dict: # 만약 로컬 파일에 결과를 저장하고 싶다면 save_file을 True로 변경
-    # 중복 제거를 위한 집합 사용
-    all_urls, all_telegrams = set(), set()
-
-    # 반환할 결과 배열
-    result = {
-        'google': [],
-        'telegrams': []
-    }
-
-    # 모든 검색어에 대한 검색 수행
-    for query in queries:
-        print(f"\n'{query}'에 대한 검색 시작...")
-        search_result = google_search(query, max_results)
-        all_urls.update(search_result['urls'])  # URL 합집합
-        all_telegrams.update(search_result['telegrams']) # 텔레그램 채널 이름 합집합
-
-    if not all_urls:
-        print("검색 결과가 없습니다.")
-    else:
-        print(f"{len(all_urls)}개의 URL을 찾았습니다.")
-
-    # 검색한 결과를 json 형식으로 정리해서 반환
-    for idx, url in enumerate(all_urls, start=1):
-        html = get_html_from_url(url)
-
-        print(f"url:{url}에 대한 결과 수신.")
-        result['google'].append({
-            "url": url,
-            "html": html,
-        })
-
-        # save_file=True라면 로컬 파일에 검색 결과 html 저장
-        if save_file:
-            file_name = f"web_{idx}.html"
-            save_html(html, "html_files", file_name)
-        time.sleep(2)  # 요청 간격 조정
-    
-    # 텔레그램 채널 결과도 함께 반환
-    result['telegrams'] = list(all_telegrams)
-
-    return result
-
-# 프로그램 실행
-if __name__ == "__main__":
-    main(["t.me 아이스", "t.me 떨"])

@@ -1,12 +1,14 @@
 import os
 import asyncio
 import json
+import re
 from . import details as ds
 import base64
 from telethon.sync import TelegramClient, types
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 from telethon.errors import UserAlreadyParticipantError
+from preprocess.extractor import dictionary
 
 import pandas as pd
 from colorama import Fore, Style
@@ -50,10 +52,6 @@ async def connect_channel(client: TelegramClient, invite_link):
         return None
 
 
-# json 파일에서 마약 은어/약어 로드(추후 데이터베이스에서 로드하도록 변경)
-with open("preprocessor/drug_dictionary.json", "r", encoding="utf-8") as filestream:
-    dictionary = json.load(filestream)
-
 # 텔레그램 채널의 메세지가 마약 거래 채널인지 판단하는 함수
 async def check_channel_content(invite_link) -> bool:
     async with TelegramClient(phone, api_id, api_hash) as client:
@@ -68,19 +66,19 @@ async def check_channel_content(invite_link) -> bool:
             suspicious_count = 0
             async for post in client.iter_messages(entity):
                 post_count += 1
-                if any(keyword in post.text for keyword in dictionary):
-                    suspicious_count += 1
+                if post.text:
+                    suspicious_count += sum([len(re.findall(re.escape(keyword), post.text)) for keyword in dictionary])
                     if suspicious_count >= 3:
                         return True
                     if post_count > 100:
                         return False
-        
+
 
         except Exception as e:
             print(f"An error occurred: {Fore.RED}{e}{Style.RESET_ALL}")
-        
-        finally:
             return False
+
+        return False
 
 
 # 채널 내의 데이터를 스크랩하는 함수
