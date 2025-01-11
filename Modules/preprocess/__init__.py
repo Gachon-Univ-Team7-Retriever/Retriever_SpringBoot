@@ -10,16 +10,12 @@ def extract_text_block():
     try:
         # 요청에서 HTML 텍스트 가져오기
         html = request.get_json().get("html", "")
-
-        if not html:
+        if html is None:
             return jsonify({"error": "No HTML content provided"}), 400
 
         # HTML에서 텍스트 블록 추출
-        promotion_content = extractor.extract_promotion_content(html)
-
-        return jsonify({
-            "promotion_content": promotion_content
-        })
+        result = extractor.extract_promotion_content(html)
+        return jsonify(result)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
