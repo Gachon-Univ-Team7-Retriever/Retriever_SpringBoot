@@ -4,6 +4,8 @@ from crawl import crawl_bp
 from preprocess import preprocess_bp
 from telegram import telegram_bp
 
+from server.logger import logger
+
 import os
 import sys
 
@@ -22,7 +24,8 @@ app.register_blueprint(preprocess_bp)
 
 
 if __name__ == "__main__":
-    print("Currently registered routes:")
+    logger.debug("Currently registered routes:")
     for rule in app.url_map.iter_rules():
-        print(f"Route: {rule}, Methods: {rule.methods}, Endpoint: {rule.endpoint}")
+        logger.debug(f"Route: {rule}, Methods: {rule.methods}, Endpoint: {rule.endpoint}")
+    logger.info("Flask server has started!")
     app.run(host="0.0.0.0", port=5000, debug=True)

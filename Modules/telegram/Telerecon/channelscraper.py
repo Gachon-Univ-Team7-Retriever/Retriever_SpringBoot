@@ -10,8 +10,9 @@ from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInv
 from telethon.errors import UserAlreadyParticipantError
 from preprocess.extractor import dictionary
 
+from server.logger import logger
+
 import pandas as pd
-from colorama import Fore, Style
 
 api_id = ds.apiID
 api_hash = ds.apiHash
@@ -29,26 +30,26 @@ async def connect_channel(client: TelegramClient, invite_link):
 
                 if isinstance(invite_info, types.ChatInvite):
                     # 초대 링크가 유효하지만 아직 참여하지 않은 경우
-                    print(f"{Fore.GREEN}Joining the channel via invite link...{Style.RESET_ALL}")
+                    logger.debug(f"Joining the channel via invite link...")
                     entity = await client(ImportChatInviteRequest(invite_hash))
-                    print(f"{Fore.GREEN}Successfully joined the channel via invite link.{Style.RESET_ALL}")
+                    logger.debug(f"Successfully joined the channel via invite link.")
                 elif isinstance(invite_info, types.ChatInviteAlready):
                     # 이미 채널에 참여 중인 경우
                     entity = await client.get_entity(invite_info.chat)
-                    print(f"{Fore.YELLOW}Already a participant in the channel. Retrieved entity.{Style.RESET_ALL}")
+                    logger.warning(f"Already a participant in the channel. Retrieved entity.")
             except Exception as e:
-                print(f"{Fore.RED}Failed to process invite link: {e}{Style.RESET_ALL}")
+                logger.error(f"Failed to process invite link: {e}")
                 return None
         else:
             # 일반적인 채널 이름 처리
             entity = await client.get_entity(invite_link)
 
         if not entity:
-            print(f"{Fore.RED}Failed to retrieve entity for the channel.{Style.RESET_ALL}")
+            logger.warning(f"Failed to retrieve entity for the channel.")
         return entity
 
     except Exception as e:
-        print(f"An error occurred: {Fore.RED}{e}{Style.RESET_ALL}")
+        logger.error(f"An error occurred: {e}")
         return None
 
 
@@ -58,7 +59,7 @@ async def check_channel_content(invite_link) -> bool:
         try:
             entity = await connect_channel(client, invite_link)
             if entity is None:
-                print("Failed to connect to the channel.")
+                logger.warning("Failed to connect to the channel.")
                 return False
             
             # 메시지 확인
@@ -75,7 +76,7 @@ async def check_channel_content(invite_link) -> bool:
 
 
         except Exception as e:
-            print(f"An error occurred: {Fore.RED}{e}{Style.RESET_ALL}")
+            logger.error(f"An error occurred: {e}")
             return False
 
         return False
@@ -87,7 +88,7 @@ async def scrape_channel_content(invite_link):
         try:
             entity = await connect_channel(client, invite_link)
             if entity is None:
-                print("Failed to connect to the channel.")
+                logger.warning("Failed to connect to the channel.")
                 return []
             # 메시지 스크랩
             content = []
@@ -99,13 +100,13 @@ async def scrape_channel_content(invite_link):
                 content.append(post_data)
 
                 if post_count % 10 == 0:
-                    print(
-                        f"{Fore.WHITE}{post_count} Posts scraped in {Fore.LIGHTYELLOW_EX}{invite_link}{Style.RESET_ALL}")
+                    logger.info(
+                        f"{post_count} Posts scraped in {invite_link}")
 
             return content
 
         except Exception as e:
-            print(f"An error occurred: {Fore.RED}{e}{Style.RESET_ALL}")
+            logger.error(f"An error occurred: {e}")
             return []
 
 async def process_message(post, client, invite_link):
@@ -133,7 +134,7 @@ async def download_media(post, client):
             )
             return base64.b64encode(media_bytes).decode('utf-8')
         except Exception as e:
-            print(f"Failed to download media: {e}")
+            logger.error(f"Failed to download media: {e}")
             return None
     return None
 
