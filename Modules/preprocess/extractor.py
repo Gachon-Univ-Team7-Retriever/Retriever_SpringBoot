@@ -1,5 +1,9 @@
+import logging
+
 from bs4 import BeautifulSoup
 import os
+
+from server.logger import logger
 
 def extract_text_blocks_from_html(html) -> list:
     # HTML 문서에서 텍스트 블록 추출
@@ -20,32 +24,52 @@ with open(dictionary_path, "r", encoding="utf-8") as filestream:
     dictionary = json.load(filestream)
 
 # 텍스트 길이가 가장 길고 특정 텍스트를 포함하는 원소를 반환하는 함수
-def extract_by_length(strings) -> str | None:
+def extract_by_length(strings) -> str|None:
     # 은어/약어 사전에 맞는 문자열들을 필터링
     filtered_strings = [chunk for chunk in strings if sum(keyword in chunk for keyword in dictionary) >= 3]
 
-    # 조건에 맞는 문자열 중 가장 긴 문자열 반환
-    if filtered_strings:
-        return str(max(filtered_strings, key=len))
-    # 조건에 맞는 문자열이 없을 경우 None 반환
-    else:
-        return None
+    # 조건에 맞는 문자열이 있다면 가장 긴 문자열을 글 내용으로 반환하고, 없다면 None 반환
+    return str(max(filtered_strings, key=len)) if filtered_strings else None
 
-def extract_promotion_content(html: str) -> None | str:
-    return extract_by_length(extract_text_blocks_from_html(html))
+
+# HTML 텍스트에서 마약 홍보에 관련된 유의미한 글 내용을 추출하고, 발견된 텔레그램 주소가 있다면 주소까지 반환하는 함수
+def extract_promotion_content(html: str) -> dict[str, str]:
+    # 전체 HTMl 텍스트를 블록으로 분할하여 유의미한 텍스트를 추출해보고, 없다면 None 저장
+    logger.debug(f"HTML 텍스트에서 마약 홍보 관련 내용 추출 시작. 텍스트 길이: {len(html)}")
+    extracted_content = extract_by_length(text_blocks := extract_text_blocks_from_html(html))
+    # 추출된 결과가 있다면 텔레그램 주소도 찾아보고, 없다면 텔레그램 주소도 빈 배열로 반환
+    telegrams = extract_telegram_links(text_blocks) if extracted_content else []
+
+    logger.debug(f"HTML 텍스트에서 추출한 결과: * 유의미한 글 내용: "
+                 f"{'있음, * 발견된 텔레그램 주소: '+str(len(telegrams))+'개' if extracted_content else '없음'}")
+    return {
+        "promotion_content": extracted_content,
+        "telegrams": telegrams
+    }
 
 
 import re
 
 # 텍스트에서 텔레그램 링크들을 식별해서 리스트로 묶어 반환하는 함수
-def extract_telegram_links(text: str) -> list[str]:
-    # joinchat/를 "+"로 변환
-    text_modified = re.sub(r"(https?://)?t\.me/joinchat/", r"\1t.me/+", text)
+def extract_telegram_links(data: str|list[str]) -> list[str]:
     # 텔레그램 주소를 식별하는 정규식 패턴
     telegram_pattern = r"(?:https?://)?t\.me/(?:s/|joinchat/)?([~+]?[a-zA-Z0-9_-]+)(?:/\d+)?"
 
     # 정규식으로 텔레그램 주소 추출
-    return re.findall(telegram_pattern, text_modified)
+    if isinstance(data, str):
+        return re.findall(telegram_pattern, data)
+    elif isinstance(data, list):
+        if all([isinstance(text, str) for text in data]):
+            # 만약 data가 string의 list일 경우, list 안에 있는 text에 대해서 정규식으로 모두 찾은 다음 list를 flatten해서 반환
+            return [telegram_link for regex_result in map(re.findall, [telegram_pattern]*len(data), data) for telegram_link in regex_result]
+        else:
+            logging.critical("Input data of function for extract_telegram_links should be a string or a list of string, "
+                             "but found something else in the list.")
+            return []
+    else:
+        logging.critical("Input data of function for extract_telegram_links should be a string or a list of string, "
+                         f"got {type(data)}.")
+        return []
 
 
 

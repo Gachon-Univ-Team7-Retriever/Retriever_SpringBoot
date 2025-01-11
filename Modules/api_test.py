@@ -2325,6 +2325,14 @@ test_set = [
     },
     {
         'enabled': True,
+        'url': "http://127.0.0.1:5000/preprocess/extract/web-promotion",
+        'method': "POST",
+        'data': {
+            "html": "삐리삐리빠라빠라뽀"
+        }
+    },
+    {
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
@@ -2332,7 +2340,7 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/check-suspicious",
         'method': "POST",
         'data': {
@@ -2340,7 +2348,7 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/crawl/links",
         'method': "POST",
         'data': {
@@ -2356,7 +2364,7 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/crawl/html",
         'method': "POST",
         'data': {
@@ -2365,7 +2373,7 @@ test_set = [
     }
 ]
 
-result = OrderedDict()
+result = list()
 for bundle in test_set:
     if not bundle['enabled']:
         continue
@@ -2375,11 +2383,17 @@ for bundle in test_set:
         response = requests.post(bundle['url'], json=bundle['data'])
     else:
         response = requests.models.Response()
+
+    request_and_response = {
+        'request': bundle['url'],
+        'response': None,
+    }
+    result.append(request_and_response)
     if response.status_code == 200:
-        result[bundle['url']] = response.json()
+        request_and_response['response'] = response.json()
         print(f"{bundle['url']} 에 대한 테스트 완료.")
     else:
-        result[bundle['url']] = f"{response.status_code}: {response.reason}"
+        request_and_response['response'] = f"{response.status_code}: {response.reason}"
         print(f"{bundle['url']} 에 대한 테스트 오류 - {response.status_code}: {response.reason}")
 
 with open("test_result.json", "w", encoding="utf-8") as file:

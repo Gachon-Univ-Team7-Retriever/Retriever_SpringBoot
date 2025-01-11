@@ -136,7 +136,7 @@ class ModuleFilter(logging.Filter):
         self.module_name = module_name
 
     def filter(self, record):
-        # 로그 레코드의 모듈이 필터에서 지정한 패키지의 자손 파일이라면 허용
+        # 로그 레코드의 모듈이 필터에서 지정한 패키지의 자손 파일이라면 허용. 예외로, flask 서버 자체의 로깅 기능을 관장하는 werkzeug를 추가 허용.
         return record.pathname.startswith(self.module_name) or record.name.startswith("werkzeug")
 
 # 패키지 또는 모듈 이름으로 필터링 -> "Modules" 디렉토리에서 __file__ 속성을 가져와서 활용.
@@ -152,7 +152,7 @@ logFileHandler.setFormatter(LogFileFormatter())
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(ColorfulFormatter())
 
-# 파일과 콘솔 핸들러에 필터 추가. 현재 flask 서버의 패키지 이름을 추가해줌으로써 라이브러리 등의 로깅 메세지는 무시된다.
+# 파일과 콘솔 핸들러에 필터 추가. 현재 flask 서버의 패키지 이름을 기준으로 필터링하기 때문에 라이브러리 등의 로깅 메세지는 무시된다.
 logFileHandler.addFilter(ModuleFilter(MODULE_NAME))
 consoleHandler.addFilter(ModuleFilter(MODULE_NAME))
 

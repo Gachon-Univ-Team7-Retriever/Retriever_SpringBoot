@@ -36,6 +36,7 @@ def google_search(query:str, num_results:int=10, api_key:str=API_KEY, search_eng
             link = item["link"]
             extracted_telegram_links = extractor.extract_telegram_links(link)
             # 추출된 텔레그램 링크가 있을 경우 텔레그램 항목에 추가
+            # Google 검색 결과이기 때문에 반환된 텔레그램 주소 목록은 1개뿐이고, 때문에 index=0만 바로 사용
             if extracted_telegram_links:
                 channel_name = extracted_telegram_links[0].lower()
                 telegrams.append(channel_name)
