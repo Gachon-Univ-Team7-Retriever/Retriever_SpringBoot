@@ -47,5 +47,8 @@ def extract_telegram_links(text: str) -> list[str]:
     # 정규식으로 텔레그램 주소 추출
     return re.findall(telegram_pattern, text_modified)
 
+
+
+
 if __name__ == "__main__":
     print(extract_telegram_links("http://t.me/+sample"))

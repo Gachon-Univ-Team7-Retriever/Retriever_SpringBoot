@@ -4,8 +4,8 @@ import json
 
 test_set = [
     {
-        'enabled': False,
-        'url': "http://127.0.0.1:5000/preprocess/extract/web_promotion",
+        'enabled': True,
+        'url': "http://127.0.0.1:5000/preprocess/extract/web-promotion",
         'method': "POST",
         'data': {
             "html":
@@ -2324,7 +2324,7 @@ test_set = [
         }
     },
     {
-        'enabled': False,
+        'enabled': True,
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
@@ -2332,7 +2332,7 @@ test_set = [
         }
     },
     {
-        'enabled': False,
+        'enabled': True,
         'url': "http://127.0.0.1:5000/telegram/channel/check-suspicious",
         'method': "POST",
         'data': {
@@ -2340,7 +2340,7 @@ test_set = [
         }
     },
     {
-        'enabled': False,
+        'enabled': True,
         'url': "http://127.0.0.1:5000/crawl/links",
         'method': "POST",
         'data': {
@@ -2375,8 +2375,12 @@ for bundle in test_set:
         response = requests.post(bundle['url'], json=bundle['data'])
     else:
         response = requests.models.Response()
-    print(f"Test for {bundle['url']} is completed.")
-    result[bundle['url']] = response.json()
+    if response.status_code == 200:
+        result[bundle['url']] = response.json()
+        print(f"{bundle['url']} 에 대한 테스트 완료.")
+    else:
+        result[bundle['url']] = f"{response.status_code}: {response.reason}"
+        print(f"{bundle['url']} 에 대한 테스트 오류 - {response.status_code}: {response.reason}")
 
 with open("test_result.json", "w", encoding="utf-8") as file:
     json.dump(result, file, ensure_ascii=False, indent=4)

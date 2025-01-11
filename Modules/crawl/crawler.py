@@ -1,6 +1,7 @@
 from preprocess import extractor
 import os
 import requests
+from server.logger import logger
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
@@ -56,17 +57,19 @@ def search_links(queries: list[str], max_results: int) -> dict:  # 만약 로컬
     # 중복 제거를 위한 집합 사용
     all_urls, all_telegrams = set(), set()
 
+    logger.info(f'검색어 {len(queries)}개에 대한 검색 시작...')
     # 모든 검색어에 대한 검색 수행
     for query in queries:
-        print(f"\n'{query}'에 대한 검색 시작...")
+        logger.debug(f'검색어 "{query}"에 대한 검색 시작...')
         search_result = google_search(query, max_results)
         all_urls.update(search_result['urls'])  # URL 합집합
         all_telegrams.update(search_result['telegrams'])  # 텔레그램 채널 이름 합집합
+        logger.debug(f'검색어 "{query}"에 대한 검색 결과: URL {len(search_result["urls"])}개, Telegram 채널 {len(search_result["telegrams"])}개')
 
     if not all_urls:
-        print("검색 결과가 없습니다.")
+        logger.info(f"검색어 {len(queries)}개에 대한 전체 검색 결과가 없습니다.")
     else:
-        print(f"{len(all_urls)}개의 URL을 찾았습니다.")
+        logger.info(f"검색어 {len(queries)}개에 대한 검색 결과: URL {len(all_urls)}개, Telegram 채널 {len(all_telegrams)}")
 
     # URL들과 텔레그램 채널 결과를 합쳐서 딕셔너리로 결과 반환
     return {
@@ -82,7 +85,7 @@ def get_html_from_url(url: str) -> str:
         html_text = response.text
         return html_text
     except requests.RequestException as e:
-        print(f"URL 요청 실패 ({url}): {e}")
+        logger.warning(f"URL [{url}] 에 대한 요청 실패: {e}")
         return ""
 
 # 각 URL의 HTML 저장 함수(현재 미사용)
@@ -94,4 +97,4 @@ def save_html(html:str, folder_path:str, file_name:str) -> None:
     file_path = os.path.join(folder_path, file_name)
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(html)
-    print(f"{file_name} 저장 완료!")
+    logger.info(f"HTML 다음 경로에 저장함: {file_name}")
