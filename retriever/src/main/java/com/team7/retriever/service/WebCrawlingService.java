@@ -1,6 +1,6 @@
 package com.team7.retriever.service;
 
-import com.team7.retriever.dto.CrawlGoogleResponse;
+// import com.team7.retriever.dto.CrawlGoogleResponse;
 import com.team7.retriever.dto.WebCrawlingRequest;
 import com.team7.retriever.dto.WebCrawlingResponse;
 import com.team7.retriever.entity.PostHtml;
@@ -26,14 +26,14 @@ public class WebCrawlingService {
     }
 
     public WebCrawlingResponse webCrawling(WebCrawlingRequest webCrawlingRequest) {
-        String api = "http://127.0.0.1:5000/crawl/google";
+        String api = "http://127.0.0.1:5000/crawl/links";
 
         HttpEntity<WebCrawlingRequest> request = new HttpEntity<>(webCrawlingRequest);
         ResponseEntity<WebCrawlingResponse> response = restTemplate.postForEntity(api, request, WebCrawlingResponse.class);
 
         WebCrawlingResponse results = response.getBody();
         if (results != null) {
-            List<CrawlGoogleResponse> google = results.getGoogle();
+            List<String> google = results.getGoogle();
             List<String> telegram = results.getTelegram();
 
             PostHtml postHtml;
@@ -41,6 +41,7 @@ public class WebCrawlingService {
             int inserted = 0;
             int updated = 0;
 
+            /*
             // google
             System.out.println("Google --------------");
             for (CrawlGoogleResponse googleResponse : google) {
@@ -70,12 +71,28 @@ public class WebCrawlingService {
                 htmlRepository.save(postHtml);
                 System.out.println(id + " saved"); // test code
             }
+
+             */
+
             // test code
+            /*
             System.out.println("Successfully saved !");
             System.out.println("Total :");
             System.out.println(inserted + " inserted");
             System.out.println(updated + " updated");
             System.out.println();
+
+             */
+
+            // google
+            System.out.println("Google --------------");
+            if (google != null) {
+                for (String googleResponse : google) {
+                    System.out.println("\t- " + googleResponse);
+                }
+            } else {
+                System.out.println("No google found");
+            }
 
             // telegram
             System.out.println("Telegram --------------");

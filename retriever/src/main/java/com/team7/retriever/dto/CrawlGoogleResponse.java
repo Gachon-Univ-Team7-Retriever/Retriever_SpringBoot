@@ -1,5 +1,5 @@
 package com.team7.retriever.dto;
-
+/*
 public class CrawlGoogleResponse {
     private String html;
     private String url;
@@ -21,3 +21,5 @@ public class CrawlGoogleResponse {
         this.url = url;
     }
 }
+
+ */

@@ -3,15 +3,16 @@ package com.team7.retriever.dto;
 import java.util.List;
 
 public class WebCrawlingResponse {
-    private List<CrawlGoogleResponse> google;
+    // private List<CrawlGoogleResponse> google;
+    private List<String> google;
     private List<String> telegram;
 
     // Getter & Setter
-    public List<CrawlGoogleResponse> getGoogle() {
+    public List<String> getGoogle() {
         return google;
     }
 
-    public void setGoogle(List<CrawlGoogleResponse> google) {
+    public void setGoogle(List<String> google) {
         this.google = google;
     }
 
