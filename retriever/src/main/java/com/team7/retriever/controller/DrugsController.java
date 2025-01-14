@@ -20,7 +20,7 @@ public class DrugsController {
     private DrugsService drugsService;
 
     // 아이디로 조회
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}") /* 241231 수정 */
     public Optional<Drugs> getDrugById(@PathVariable String id) {
         return drugsService.getDrugById(id);
     }

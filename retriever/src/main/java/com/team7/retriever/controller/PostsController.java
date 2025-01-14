@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts")
@@ -22,6 +23,11 @@ public class PostsController {
     public List<Posts> getAllPosts() {
         return PostsService.getAllPosts();
     }
+    
+    /* 241231 추가 */
+    // Id로 조회
+    @GetMapping("/id/{id}") 
+    public Optional<Posts> getPostById(@PathVariable String id) { return PostsService.getPostById(id); }
 
     // 태그로 조회
     @GetMapping("/tag/{tag}")

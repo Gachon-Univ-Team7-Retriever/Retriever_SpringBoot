@@ -12,6 +12,7 @@ public class PostHtml {
     private String id;
     private String postId;
     private String html;
+    private String url; /* 250102 추가 */
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -23,10 +24,12 @@ public class PostHtml {
         this.id = id;
     }
 
+    /* 250102 추가 */
     public String getPostId() {
         return postId;
     }
 
+    /* 250102 추가 */
     public void setPostId(String postId) {
         this.postId = postId;
     }
@@ -37,6 +40,14 @@ public class PostHtml {
 
     public void setHtml(String html) {
         this.html = html;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public LocalDateTime getCreatedAt() {
