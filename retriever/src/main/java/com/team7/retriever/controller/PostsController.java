@@ -29,6 +29,14 @@ public class PostsController {
     @GetMapping("/id/{id}") 
     public Optional<Posts> getPostById(@PathVariable String id) { return PostsService.getPostById(id); }
 
+    /*
+    // 특정 게시글 ID로 조회
+    @GetMapping("/{id}")
+    public Posts getPostById(@PathVariable String id) {
+        return PostsService.getPostById(id);
+    }
+     */
+
     // 태그로 조회
     @GetMapping("/tag/{tag}")
     public List<Posts> getPostsByTag(@PathVariable String tag) {
