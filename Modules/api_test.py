@@ -4,7 +4,7 @@ import json
 
 test_set = [
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/preprocess/extract/web-promotion",
         'method': "POST",
         'data': {
@@ -2324,7 +2324,7 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/preprocess/extract/web-promotion",
         'method': "POST",
         'data': {
@@ -2369,6 +2369,42 @@ test_set = [
         'method': "POST",
         'data': {
             "link": "https://www.teia.co.kr/25/?q=YToyOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjtzOjQ6InBhZ2UiO2k6MTI7fQ%3D%3D&bmode=view&idx=139766712&t=board&category=0JV5F0VX73"
+        }
+    },
+    {
+        'enabled': True,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_name": "Hyde_Sandbox",
+            "how": "start"
+        }
+    },
+    {
+        'enabled': True,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_name": "Hyde_Sandbox2",
+            "how": "start"
+        }
+    },
+    {
+        'enabled': True,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_name": "Hyde_Sandbox",
+            "how": "stop"
+        }
+    },
+    {
+        'enabled': True,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_name": "Hyde_Sandbox2",
+            "how": "stop"
         }
     }
 ]
