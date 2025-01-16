@@ -1,11 +1,5 @@
 from flask import Flask, request, jsonify
 
-from crawl import crawl_bp
-from preprocess import preprocess_bp
-from telegram import telegram_bp
-
-from server.logger import logger
-
 import os
 import sys
 
@@ -13,6 +7,12 @@ import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
+
+from crawl import crawl_bp
+from preprocess import preprocess_bp
+from telegram import telegram_bp
+
+from server.logger import logger
 
 
 app = Flask(__name__)

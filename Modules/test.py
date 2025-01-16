@@ -1,3 +1,7 @@
-nested_list = [[1, 2, 3], [4, 5], [6, 7, 8, 9]]
-flattened_list = [item for sublist in nested_list for item in sublist]
-print(flattened_list)
+from server.logger import logger
+
+logger.info("정보를 전달하는 메세지입니다.")
+logger.debug("디버깅 정보를 전달하는 메세지.")
+logger.warning("디버깅 정보를 전달하는 메세지.")
+logger.error("디버깅 정보를 전달하는 메세지.")
+logger.critical("디버깅 정보를 전달하는 메세지.")
