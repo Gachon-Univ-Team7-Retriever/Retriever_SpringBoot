@@ -1,12 +1,10 @@
 async function copyDatabase() {
-    const host = document.getElementById('host').value;
-    const port = document.getElementById('port').value;
     const sourceDb = document.getElementById('sourceDb').value;
     const targetDb = document.getElementById('targetDb').value;
     const statusDiv = document.getElementById('status');
 
     // Validation
-    if (!host || !port || !sourceDb || !targetDb) {
+    if (!sourceDb || !targetDb) {
         statusDiv.textContent = "Please fill in all fields.";
         statusDiv.classList.add('error');
         return;
@@ -22,7 +20,7 @@ async function copyDatabase() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ host, port, sourceDb, targetDb }),
+            body: JSON.stringify({ sourceDb, targetDb }),
         });
 
         const result = await response.json();

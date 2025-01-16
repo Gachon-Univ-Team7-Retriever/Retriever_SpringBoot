@@ -6,9 +6,9 @@ app.use(express.json());
 app.use(express.static(__dirname)); // Serve the HTML and JS files
 
 app.post('/copy-database', async (req, res) => {
-    const { host, port, sourceDb, targetDb } = req.body;
-    const sourceUri = `mongodb://${host}:${port}/${sourceDb}`;
-    const targetUri = `mongodb://${host}:${port}/${targetDb}`;
+    const { sourceDb, targetDb } = req.body;
+    const sourceUri = `mongodb://localhost:27017/${sourceDb}`;
+    const targetUri = `mongodb://localhost:27017/${targetDb}`;
 
     const sourceClient = new MongoClient(sourceUri);
     const targetClient = new MongoClient(targetUri);
