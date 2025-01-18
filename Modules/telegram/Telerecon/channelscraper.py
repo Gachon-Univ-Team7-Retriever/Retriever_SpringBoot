@@ -2,21 +2,14 @@ import os
 import asyncio
 import json
 import re
-from . import details as ds
+from . import telegram_client
 import base64
 from telethon.sync import TelegramClient, types
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
-from telethon.errors import UserAlreadyParticipantError
 from preprocess.extractor import dictionary
 
 from server.logger import logger
-
-import pandas as pd
-
-api_id = ds.apiID
-api_hash = ds.apiHash
-phone = ds.number
 
 async def connect_channel(client: TelegramClient, invite_link):
     entity = None
@@ -49,65 +42,63 @@ async def connect_channel(client: TelegramClient, invite_link):
         return entity
 
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred in connect_channel(): {e}")
         return None
 
 
 # 텔레그램 채널의 메세지가 마약 거래 채널인지 판단하는 함수
 async def check_channel_content(invite_link) -> bool:
-    async with TelegramClient(phone, api_id, api_hash) as client:
-        try:
-            entity = await connect_channel(client, invite_link)
-            if entity is None:
-                logger.warning("Failed to connect to the channel.")
-                return False
-            
-            # 메시지 확인
-            post_count = 0
-            suspicious_count = 0
-            async for post in client.iter_messages(entity):
-                post_count += 1
-                if post.text:
-                    suspicious_count += sum([len(re.findall(re.escape(keyword), post.text)) for keyword in dictionary])
-                    if suspicious_count >= 3:
-                        return True
-                    if post_count > 100:
-                        return False
-
-
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
+    try:
+        entity = await connect_channel(telegram_client.client, invite_link)
+        if entity is None:
+            logger.warning("Failed to connect to the channel.")
             return False
 
+        # 메시지 확인
+        post_count = 0
+        suspicious_count = 0
+        async for post in telegram_client.client.iter_messages(entity):
+            post_count += 1
+            if post.text:
+                suspicious_count += sum([len(re.findall(re.escape(keyword), post.text)) for keyword in dictionary])
+                if suspicious_count >= 3:
+                    return True
+                if post_count > 100:
+                    return False
+
+
+    except Exception as e:
+        logger.error(f"An error occurred in check_channel_content(): {e}")
         return False
+
+    return False
 
 
 # 채널 내의 데이터를 스크랩하는 함수
 async def scrape_channel_content(invite_link):
-    async with TelegramClient(phone, api_id, api_hash) as client:
-        try:
-            entity = await connect_channel(client, invite_link)
-            if entity is None:
-                logger.warning("Failed to connect to the channel.")
-                return []
-            # 메시지 스크랩
-            content = []
-            post_count = 0
-
-            async for post in client.iter_messages(entity):
-                post_count += 1
-                post_data = await process_message(post, client, invite_link)
-                content.append(post_data)
-
-                if post_count % 10 == 0:
-                    logger.info(
-                        f"{post_count} Posts scraped in {invite_link}")
-
-            return content
-
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
+    try:
+        entity = await connect_channel(telegram_client.client, invite_link)
+        if entity is None:
+            logger.warning("Failed to connect to the channel.")
             return []
+        # 메시지 스크랩
+        content = []
+        post_count = 0
+
+        async for post in telegram_client.client.iter_messages(entity):
+            post_count += 1
+            post_data = await process_message(post, telegram_client.client, invite_link)
+            content.append(post_data)
+
+            if post_count % 10 == 0:
+                logger.info(
+                    f"{post_count} Posts scraped in {invite_link}")
+
+        return content
+
+    except Exception as e:
+        logger.error(f"An error occurred in scrape_channel_content(): {e}")
+        return []
 
 async def process_message(post, client, invite_link):
     text = post.text or ""
