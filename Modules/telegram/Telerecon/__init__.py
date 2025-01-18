@@ -1,5 +1,6 @@
 import asyncio
 import threading
+import time
 
 from telethon import TelegramClient
 from telegram.Telerecon import details as ds
@@ -25,16 +26,19 @@ class TelegramSingleton:
                     cls._instance = super(TelegramSingleton, cls).__new__(cls)
                     cls._instance.client = None
                     cls._instance.my_user_id = None
-                    cls._instance._init_future = asyncio.Future()
+                    cls._instance._loop = None  # 🔧 (수정됨) 이벤트 루프 저장
+                    cls._instance._init_future = None  # 🔧 (수정됨) Future를 늦게 생성
         return cls._instance
 
-    async def start_client(self, loop):
-        self.client = TelegramClient(ds.number, ds.apiID, ds.apiHash, loop=loop)
+    async def start_client(self):
+        """ 텔레그램 클라이언트 시작 """
+        self.client = TelegramClient(ds.number, ds.apiID, ds.apiHash, loop=self._loop)
         await self.client.start()
         logger.info("Telegram Client started.")
         return self.client
 
     async def get_me(self):
+        """ 사용자 정보 가져오기 """
         if self.client is None:
             logger.error("Client is not initialized yet!")
             return None
@@ -45,23 +49,46 @@ class TelegramSingleton:
         self.my_user_id = me.id
         return me.id
 
+    async def _init_async(self):
+        """ 비동기 초기화 (Future 설정 포함) """
+        await self.start_client()
+        await self.get_me()
+        self._init_future.set_result(True)  # Future 완료 설정
+        logger.info("Telegram Client initialization complete.")
+        print(f"[DEBUG] in sub thread: Future state -> {self._init_future.done()}")  # 🔧 (디버깅 추가)
+
     def init(self, loop):
         """ 백그라운드 스레드에서 실행할 init() """
-        # 비동기 작업을 순차적으로 실행
-        loop.run_until_complete(self.start_client(loop))
-        loop.run_until_complete(self.get_me())
-        self._init_future.set_result(True)  # Future를 완료 상태로 설정
-        logger.info("Telegram Client initialization complete.")
-        print(f"in sub thread:{self._init_future}")
+        self._loop = loop  # 🔧 (수정됨) 현재 스레드의 이벤트 루프 저장
+        self._init_future = loop.create_future()  # 🔧 (수정됨) 현재 루프에서 Future 생성
+        loop.run_until_complete(self._init_async())  # 클라이언트 비동기 실행
 
     def wait_for_init(self):
         """ 메인 스레드에서 백그라운드 작업이 끝날 때까지 대기 """
-        loop = asyncio.get_event_loop()  # 메인 스레드의 이벤트 루프 사용
-        print(f"in main thread:{self._init_future}")
-        loop.run_until_complete(self._init_future)  # Future가 완료될 때까지 대기
+        print("[DEBUG] Waiting for initialization...")
+
+        # 🔧 (수정됨) Future가 생성될 때까지 대기
+        while self._init_future is None:
+            time.sleep(0.1)
+
+        print(f"[DEBUG] in main thread: Future state before wait -> {self._init_future.done()}")
+
+        if self._init_future.done():
+            print("[DEBUG] Initialization already completed.")
+            return
+
+        # 🔧 (수정됨) 새로운 코루틴을 만들어서 asyncio.run_coroutine_threadsafe() 실행
+        async def wait_for_future():
+            await self._init_future  # Future가 완료될 때까지 대기
+
+        future = asyncio.run_coroutine_threadsafe(wait_for_future(), self._loop)
+        future.result()  # Future 완료될 때까지 대기
+
+        print(f"[DEBUG] in main thread: Future state after wait -> {self._init_future.done()}")
 
 
 def init_telegram():
+    """ 백그라운드 스레드에서 실행되는 초기화 함수 """
     client = TelegramSingleton()
     loop = asyncio.new_event_loop()  # 백그라운드 스레드에서 새 이벤트 루프 생성
     asyncio.set_event_loop(loop)  # 새 루프를 설정

@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import os
 
 from server.logger import logger
+from typing import Optional, Union
 
 def extract_text_blocks_from_html(html) -> list:
     # HTML 문서에서 텍스트 블록 추출
@@ -24,7 +25,7 @@ with open(dictionary_path, "r", encoding="utf-8") as filestream:
     dictionary = json.load(filestream)
 
 # 텍스트 길이가 가장 길고 특정 텍스트를 포함하는 원소를 반환하는 함수
-def extract_by_length(strings) -> str|None:
+def extract_by_length(strings: Union[str, list[str]]) -> Optional[str]:
     # 은어/약어 사전에 맞는 문자열들을 필터링
     filtered_strings = [chunk for chunk in strings if sum(keyword in chunk for keyword in dictionary) >= 3]
 
@@ -51,7 +52,7 @@ def extract_promotion_content(html: str) -> dict[str, str]:
 import re
 
 # 텍스트에서 텔레그램 링크들을 식별해서 리스트로 묶어 반환하는 함수
-def extract_telegram_links(data: str|list[str]) -> list[str]:
+def extract_telegram_links(data: Union[str, list[str]]) -> list[str]:
     # 텔레그램 주소를 식별하는 정규식 패턴
     telegram_pattern = r"(?:https?://)?t\.me/(?:s/|joinchat/)?([~+]?[a-zA-Z0-9_-]+)(?:/\d+)?"
 
