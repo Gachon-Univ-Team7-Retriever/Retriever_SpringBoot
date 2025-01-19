@@ -2332,11 +2332,11 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False | True,
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox"
+            "channel_name": "Hyde_Sandbox2"
         }
     },
     {
@@ -2429,7 +2429,11 @@ for bundle in test_set:
         request_and_response['response'] = response.json()
         print(f"{bundle['url']} 에 대한 테스트 완료.")
     else:
-        request_and_response['response'] = f"{response.status_code}: {response.reason}"
+        try:
+            request_and_response['response'] = response.json()
+        except Exception as e:
+            print(f"json 형태의 응답이 아님!")
+            request_and_response['response'] = f"{response.status_code}: {response.reason}"
         print(f"{bundle['url']} 에 대한 테스트 오류 - {response.status_code}: {response.reason}")
 
 with open("test_result.json", "w", encoding="utf-8") as file:

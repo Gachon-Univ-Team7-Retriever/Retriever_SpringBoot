@@ -2,7 +2,7 @@ import os
 import asyncio
 import json
 import re
-from . import telegram_client
+from . import telegram_singleton
 import base64
 from telethon.sync import TelegramClient, types
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
@@ -19,7 +19,7 @@ async def connect_channel(client: TelegramClient, invite_link):
             invite_hash = invite_link.split("+")[1]
             try:
                 # 초대 링크 유효성 검사 및 채널 정보 가져오기
-                invite_info = await client(CheckChatInviteRequest(invite_hash))
+                invite_info = client(CheckChatInviteRequest(invite_hash))
 
                 if isinstance(invite_info, types.ChatInvite):
                     # 초대 링크가 유효하지만 아직 참여하지 않은 경우
@@ -49,7 +49,8 @@ async def connect_channel(client: TelegramClient, invite_link):
 # 텔레그램 채널의 메세지가 마약 거래 채널인지 판단하는 함수
 async def check_channel_content(invite_link) -> bool:
     try:
-        entity = await connect_channel(telegram_client.client, invite_link)
+        logger.debug(f"Connecting to channel: {invite_link}")
+        entity = await connect_channel(telegram_singleton.client, invite_link)
         if entity is None:
             logger.warning("Failed to connect to the channel.")
             return False
@@ -57,7 +58,7 @@ async def check_channel_content(invite_link) -> bool:
         # 메시지 확인
         post_count = 0
         suspicious_count = 0
-        async for post in telegram_client.client.iter_messages(entity):
+        async for post in telegram_singleton.client.iter_messages(entity):
             post_count += 1
             if post.text:
                 suspicious_count += sum([len(re.findall(re.escape(keyword), post.text)) for keyword in dictionary])
@@ -76,8 +77,9 @@ async def check_channel_content(invite_link) -> bool:
 
 # 채널 내의 데이터를 스크랩하는 함수
 async def scrape_channel_content(invite_link):
+    logger.debug(f"Connecting to channel: {invite_link}")
     try:
-        entity = await connect_channel(telegram_client.client, invite_link)
+        entity = await connect_channel(telegram_singleton.client, invite_link)
         if entity is None:
             logger.warning("Failed to connect to the channel.")
             return []
@@ -85,9 +87,9 @@ async def scrape_channel_content(invite_link):
         content = []
         post_count = 0
 
-        async for post in telegram_client.client.iter_messages(entity):
+        async for post in telegram_singleton.client.iter_messages(entity):
             post_count += 1
-            post_data = await process_message(post, telegram_client.client, invite_link)
+            post_data = await process_message(post, telegram_singleton.client, invite_link)
             content.append(post_data)
 
             if post_count % 10 == 0:
@@ -147,17 +149,14 @@ def extract_sender_info(sender):
 
 # 채널 데이터 수집을 동기적으로 실행하는 동기 래퍼(wrapper) 함수
 def scrape(channel_name:str) -> list[dict]:
-    # 비동기 데이터 수집 실행 후 반환
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    return loop.run_until_complete(scrape_channel_content(channel_name))
+    future = asyncio.run_coroutine_threadsafe(scrape_channel_content(channel_name), telegram_singleton.loop)
+    return future.result()  # 블로킹 호출 (결과를 기다림)
 
 
 # 채널 데이터 의심도 검증을 동기적으로 실행하는 동기 래퍼(wrapper) 함수
 def check(channel_name:str) -> bool:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    return loop.run_until_complete(check_channel_content(channel_name))
+    future = asyncio.run_coroutine_threadsafe(check_channel_content(channel_name), telegram_singleton.loop)
+    return future.result()  # 블로킹 호출 (결과를 기다림)
 
 # async def main():
 #     try:

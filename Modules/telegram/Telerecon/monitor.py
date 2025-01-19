@@ -1,14 +1,14 @@
 import asyncio
 from datetime import datetime
 from telethon import events
-from . import telegram_client
+from . import telegram_singleton
 from server.logger import logger
 
 
 # 특정 user id로 정기적인 심장박동 메세지를 보내는 비동기 함수
 async def periodic_message(user_id):
     while True:
-        await telegram_client.client.send_message(user_id, 'Periodic status message')
+        await telegram_singleton.client.send_message(user_id, 'Periodic status message')
         await asyncio.sleep(43200)
 
 async def monitor_channel(channel_username):
@@ -18,12 +18,12 @@ async def monitor_channel(channel_username):
 
     try:
         # 채널 엔티티 가져오기
-        channel = await telegram_client.client.get_entity(channel_username)
+        channel = await telegram_singleton.client.get_entity(channel_username)
         logger.debug(f"Monitoring channel - Channel Name: {channel.title}, Channel ID: {channel.id}")  # https://t.me/<channel_username>의 채널 ID 출력
 
         # 이벤트 핸들러 저장 및 등록
         event_handlers_map[channel_username] = event_handler
-        telegram_client.client.add_event_handler(event_handler, events.NewMessage(chats=channel.id))
+        telegram_singleton.client.add_event_handler(event_handler, events.NewMessage(chats=channel.id))
     except asyncio.CancelledError:
         logger.info(f"Task for {channel_username} was cancelled. Cleaning up...")
     except Exception as e:
@@ -35,7 +35,7 @@ def start_monitoring(channel_username):
         if channel_username in monitoring_task_map:
             logger.warning(f"Already monitoring {channel_username}")
             return
-        monitoring_task_map[channel_username] = asyncio.run_coroutine_threadsafe(monitor_channel(channel_username), loop)
+        monitoring_task_map[channel_username] = asyncio.run_coroutine_threadsafe(monitor_channel(channel_username), telegram_singleton.loop)
         logger.info(f"Started monitoring {channel_username}")
     except Exception as e:
         logger.error(f"Error in start_monitoring(): {e}")
@@ -49,7 +49,7 @@ def stop_monitoring(channel_username):
 
         # 2. 등록된 이벤트 핸들러 제거
         if channel_username in event_handlers_map:
-            telegram_client.client.remove_event_handler(event_handlers_map[channel_username])
+            telegram_singleton.client.remove_event_handler(event_handlers_map[channel_username])
             del event_handlers_map[channel_username]
         
         # 3. 모니터링 Task 제거
@@ -84,7 +84,7 @@ async def my_event_handler(event):
             save_message_to_file(sender_name, sender_id, message_text, now.strftime("%Y-%m-%d %H:%M:%S"))
 
             # 메세지를 나에게 포워딩
-            await telegram_client.client.forward_messages(telegram_client.my_user_id, event.message)
+            await telegram_singleton.client.forward_messages(telegram_singleton.my_user_id, event.message)
             logger.info(f"Target(ID: {sender_id}, name: {sender_name}) spoke. time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
         except Exception as e:
             logger.error(f"Error retrieving sender info: {e}")
@@ -92,4 +92,4 @@ async def my_event_handler(event):
 
 monitoring_task_map, event_handlers_map  = {}, {}
 # 백그라운드 작업 실행
-telegram_client.client.loop.create_task(periodic_message(telegram_client.my_user_id))
+telegram_singleton.loop.create_task(periodic_message(telegram_singleton.my_user_id))
