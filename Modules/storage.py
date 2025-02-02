@@ -132,3 +132,40 @@ def main(queries: list[str], max_results: int,
     result['telegrams'] = list(all_telegrams)
 
     return result
+
+# 원래 channelscraper.py에 있던 기능
+# from colorama import Fore, Style
+# import pandas as pd
+#
+# async def main():
+#     try:
+#         channel_name = input(
+#             f"{Fore.CYAN}Please enter a target Telegram channel (e.g., https://t.me/{Fore.LIGHTYELLOW_EX}your_channel{Style.RESET_ALL}):\n")
+#         print(f'You entered "{Fore.LIGHTYELLOW_EX}{channel_name}{Style.RESET_ALL}"')
+#         answer = input('Is this correct? (y/n)')
+#         if answer != 'y':
+#             return
+#
+#         output_directory = sanitizer.sanitize_filename(f"Collection/{channel_name}")
+#         if not os.path.exists(output_directory):
+#             os.makedirs(output_directory)
+#
+#         csv_filename = sanitizer.sanitize_filename(f'{output_directory}/{channel_name}_messages.csv')
+#         print(f'Scraping content from {Fore.LIGHTYELLOW_EX}{channel_name}{Style.RESET_ALL}...')
+#
+#         content = await scrape_channel_content(channel_name)
+#
+#         if content:
+#             df = pd.DataFrame(content, columns=['Datetime', 'Text', 'Username', 'First Name', 'Last Name', 'User ID', 'Views',
+#                                                 'Message URL', 'Media File Path'])
+#             try:
+#                 df.to_csv(csv_filename, index=False)
+#                 print(
+#                     f'Successfully scraped and saved content to {Fore.LIGHTYELLOW_EX}{csv_filename}{Style.RESET_ALL}.')
+#             except Exception as e:
+#                 print(f"An error occurred while saving to CSV: {Fore.RED}{e}{Style.RESET_ALL}")
+#         else:
+#             print(f'{Fore.RED}No content scraped.{Style.RESET_ALL}')
+#
+#     except Exception as e:
+#         print(f"An error occurred: {Fore.RED}{e}{Style.RESET_ALL}")

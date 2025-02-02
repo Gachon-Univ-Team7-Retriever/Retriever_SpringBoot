@@ -117,7 +117,10 @@ def init_telegram_singleton():
     """ 백그라운드 스레드에서 실행되는 텔레그램 클라이언트 초기화 함수 """
     telegram_singleton = TelegramSingleton() # 여기서는 백그라운드 호출이기 때문에, Singleton 객체에서
     singleton_ready.set()  # 이벤트 트리거: (백그라운드 스레드에서) 싱글톤의 준비가 완료되었음을 이벤트로 알림
-    telegram_singleton.loop.run_forever()  # 백그라운드에서 루프 계속 실행
+    try:
+        telegram_singleton.loop.run_forever()  # 백그라운드에서 루프 계속 실행
+    finally:
+        telegram_singleton.client.disconnect()
 
 
 # 별도의 스레드에서 실행

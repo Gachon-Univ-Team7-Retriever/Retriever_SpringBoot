@@ -1,50 +1,10 @@
-import os
 import asyncio
-import json
 import re
 from . import telegram_singleton
-import base64
-from telethon.sync import TelegramClient, types
-from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
-from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
+from .utils import *
 from preprocess.extractor import dictionary
-
+from server.db import get_mongo_client
 from server.logger import logger
-
-async def connect_channel(client: TelegramClient, invite_link):
-    entity = None
-    try:
-        # 초대 링크 처리
-        if invite_link.startswith("+"):
-            invite_hash = invite_link.split("+")[1]
-            try:
-                # 초대 링크 유효성 검사 및 채널 정보 가져오기
-                invite_info = client(CheckChatInviteRequest(invite_hash))
-
-                if isinstance(invite_info, types.ChatInvite):
-                    # 초대 링크가 유효하지만 아직 참여하지 않은 경우
-                    logger.debug(f"Joining the channel via invite link...")
-                    entity = await client(ImportChatInviteRequest(invite_hash))
-                    logger.debug(f"Successfully joined the channel via invite link.")
-                elif isinstance(invite_info, types.ChatInviteAlready):
-                    # 이미 채널에 참여 중인 경우
-                    entity = await client.get_entity(invite_info.chat)
-                    logger.warning(f"Already a participant in the channel. Retrieved entity.")
-            except Exception as e:
-                logger.error(f"Failed to process invite link: {e}")
-                return None
-        else:
-            # 일반적인 채널 이름 처리
-            entity = await client.get_entity(invite_link)
-
-        if not entity:
-            logger.warning(f"Failed to retrieve entity for the channel.")
-        return entity
-
-    except Exception as e:
-        logger.error(f"An error occurred in connect_channel(): {e}")
-        return None
-
 
 # 텔레그램 채널의 메세지가 마약 거래 채널인지 판단하는 함수
 async def check_channel_content(invite_link) -> bool:
@@ -78,72 +38,53 @@ async def check_channel_content(invite_link) -> bool:
 # 채널 내의 데이터를 스크랩하는 함수
 async def scrape_channel_content(invite_link):
     logger.debug(f"Connecting to channel: {invite_link}")
+
+    content = []
     try:
         entity = await connect_channel(telegram_singleton.client, invite_link)
         if entity is None:
             logger.warning("Failed to connect to the channel.")
             return []
         # 메시지 스크랩
-        content = []
         post_count = 0
 
-        async for post in telegram_singleton.client.iter_messages(entity):
+        async for message in telegram_singleton.client.iter_messages(entity):
             post_count += 1
-            post_data = await process_message(post, telegram_singleton.client, invite_link)
+            post_data = await process_message(entity, telegram_singleton.client, message)
             content.append(post_data)
 
             if post_count % 10 == 0:
-                logger.info(
-                    f"{post_count} Posts scraped in {invite_link}")
-
-        return content
+                logger.info(f"{post_count} Posts is scraped from {invite_link}")
 
     except Exception as e:
         logger.error(f"An error occurred in scrape_channel_content(): {e}")
         return []
 
-async def process_message(post, client, invite_link):
-    text = post.text or ""
-    media_base64 = await download_media(post, client)
-    message_date = post.date.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        # MongoDB client 생성
+        mongo_client = get_mongo_client()
+        db_name, collection_name = 'retriever-jisung', 'channel_data'
+        # 컬렉션 선택
+        collection = mongo_client[db_name][collection_name]
 
-    sender_info = extract_sender_info(post.sender)
+        # 수집된 채팅을 한 번에 모두 삽입. 이때 리스트 컴프리헨션으로 깊은 복사를 하지 않으면, MongoClient가 자동으로 content에 "_id"를 추가한 뒤에 삽입하기 때문에 원본 데이터가 변형됨.
+        collection.insert_many([chat.copy() for chat in content])
+    except Exception as exception:
+        logger.error(f"Error occurred while inserting data into MongoDB: {exception}")
+    else:
+        logger.info(f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}")
 
+    return content
+
+async def process_message(entity, client, message):
     return {
-        "date": message_date,
-        "text": text,
-        **sender_info,
-        "views": post.views or "N/A",
-        "url": f"https://t.me/{invite_link.split('+')[-1]}/{post.id}",
-        "media": media_base64,
-    }
-
-async def download_media(post, client):
-    if post.media and isinstance(post.media, (MessageMediaPhoto, MessageMediaDocument)):
-        try:
-            media_bytes = await client.download_media(
-                message=post,
-                file=bytes
-            )
-            return base64.b64encode(media_bytes).decode('utf-8')
-        except Exception as e:
-            logger.error(f"Failed to download media: {e}")
-            return None
-    return None
-
-def extract_sender_info(sender):
-    if sender and isinstance(sender, types.User):
-        return {
-            "username": sender.username or "N/A",
-            "first_name": sender.first_name or "N/A",
-            "last_name": sender.last_name if sender.last_name else "N/A",
-            "user_id": sender.id,
-        }
-    return {
-        "username": "N/A",
-        "first_name": "N/A",
-        "last_name": "N/A",
-        "user_id": "N/A",
+        "channelId": entity.id,
+        "timestamp": message.date,
+        "text": message.text or "",
+        "sender": extract_sender_info(message.sender),
+        "views": message.views or None,
+        "url": get_message_url_from_message(entity, message),
+        "media": await download_media(message, client),
     }
 
 
@@ -157,40 +98,3 @@ def scrape(channel_name:str) -> list[dict]:
 def check(channel_name:str) -> bool:
     future = asyncio.run_coroutine_threadsafe(check_channel_content(channel_name), telegram_singleton.loop)
     return future.result()  # 블로킹 호출 (결과를 기다림)
-
-# async def main():
-#     try:
-#         channel_name = input(
-#             f"{Fore.CYAN}Please enter a target Telegram channel (e.g., https://t.me/{Fore.LIGHTYELLOW_EX}your_channel{Style.RESET_ALL}):\n")
-#         print(f'You entered "{Fore.LIGHTYELLOW_EX}{channel_name}{Style.RESET_ALL}"')
-#         answer = input('Is this correct? (y/n)')
-#         if answer != 'y':
-#             return
-#
-#         output_directory = sanitizer.sanitize_filename(f"Collection/{channel_name}")
-#         if not os.path.exists(output_directory):
-#             os.makedirs(output_directory)
-#
-#         csv_filename = sanitizer.sanitize_filename(f'{output_directory}/{channel_name}_messages.csv')
-#         print(f'Scraping content from {Fore.LIGHTYELLOW_EX}{channel_name}{Style.RESET_ALL}...')
-#
-#         content = await scrape_channel_content(channel_name)
-#
-#         if content:
-#             df = pd.DataFrame(content, columns=['Datetime', 'Text', 'Username', 'First Name', 'Last Name', 'User ID', 'Views',
-#                                                 'Message URL', 'Media File Path'])
-#             try:
-#                 df.to_csv(csv_filename, index=False)
-#                 print(
-#                     f'Successfully scraped and saved content to {Fore.LIGHTYELLOW_EX}{csv_filename}{Style.RESET_ALL}.')
-#             except Exception as e:
-#                 print(f"An error occurred while saving to CSV: {Fore.RED}{e}{Style.RESET_ALL}")
-#         else:
-#             print(f'{Fore.RED}No content scraped.{Style.RESET_ALL}')
-#
-#     except Exception as e:
-#         print(f"An error occurred: {Fore.RED}{e}{Style.RESET_ALL}")
-
-
-# if __name__ == '__main__':
-#     asyncio.run(main())

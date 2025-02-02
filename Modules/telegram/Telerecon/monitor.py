@@ -1,8 +1,12 @@
 import asyncio
 from datetime import datetime
+import telethon
 from telethon import events
 from . import telegram_singleton
+from .utils import *
 from server.logger import logger
+
+from pymongo import MongoClient
 
 
 # 특정 user id로 정기적인 심장박동 메세지를 보내는 비동기 함수
@@ -11,10 +15,57 @@ async def periodic_message(user_id):
         await telegram_singleton.client.send_message(user_id, 'Periodic status message')
         await asyncio.sleep(43200)
 
-async def monitor_channel(channel_username):
-    # 새로운 이벤트 핸들러 정의 (채널별로 별도 핸들러 생성)
+def insert_data(collection, data):
+    # 데이터 삽입
+    result = collection.insert_one(data)
+    # 삽입된 데이터의 ObjectId 출력
+    logger.debug(f"Monitored Telegram chat inserted with ID: {result.inserted_id}")
+
+async def monitor_channel(channel_username:str):
+    # 새로운 이벤트 핸들러 정의 (채널별로 별도 핸들러를 생성하기 위해, 함수 내에서 동적으로 선언)
     async def event_handler(event):
-        await my_event_handler(event)
+        """ 메세지가 발생하면 반응하기 위한 핸들러의 비동기 함수 """
+        chat = await event.get_chat()
+        if chat and event.message: # 이벤트가 채팅방 이벤트이고, 메세지가 있을 때
+            message, sender = event.message, await event.get_sender()
+            message_text = message.message  # 메시지 텍스트 가져오기
+
+            new_data = None
+            try:
+                # 삽입할 채팅 데이터 정의
+                new_data = {
+                    "channelId": chat.id,
+                    "sender": extract_sender_info(sender), # 송신자 정보 가져오기
+                    "msgUrl": get_message_url_from_event(event),
+                    "text": message_text,
+                    "timestamp": message.date, # datetime 형식의 메세지 발생 시간,
+                    "media": await download_media(message, telegram_singleton.client)
+                }
+
+                logger.info(
+                    f"Detected Message from {new_data['sender'].get('name')}: {message_text} at {new_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+
+                # 메세지를 나에게 포워딩
+                await telegram_singleton.client.forward_messages(telegram_singleton.my_user_id, event.message)
+                logger.info(
+                    f"Target(ID: {new_data['sender'].get('id')}, name: {new_data['sender'].get('name')}) spoke. time: {new_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+            except Exception as exception:
+                logger.error(f"Error in telegram event handler: {exception}")
+            
+            # 모니터링한 채팅을 MongoDB에 입력
+            if new_data:
+                try:
+                    # MongoDB client 생성
+                    mongo_client = MongoClient('mongodb://admin:sherlocked@34.64.201.10:27017/')
+                    db_name, collection_name = 'retriever-jisung', 'channel_data'
+                    # 컬렉션 선택
+                    collection = mongo_client['retriever-jisung']['channel_data']
+                    # 데이터 삽입
+                    collection.insert_one(new_data)
+                except Exception as exception:
+                    logger.error(f"Error occurred while inserting data into MongoDB: {exception}")
+                else:
+                    logger.info(f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}")
 
     try:
         # 채널 엔티티 가져오기
@@ -28,6 +79,7 @@ async def monitor_channel(channel_username):
         logger.info(f"Task for {channel_username} was cancelled. Cleaning up...")
     except Exception as e:
         logger.error(f"Error in monitor_channel(): {e}")
+
 
 # 특정 채널 모니터링을 시작하는 동기 함수
 def start_monitoring(channel_username):
@@ -69,25 +121,6 @@ def save_message_to_file(sender_name, sender_id, message_text, timestamp):
         log_entry = f"[{timestamp}] Sender: {sender_name} (ID: {sender_id}), Message: {message_text}\n"
         file.write(log_entry)
 
-async def my_event_handler(event):
-    if event.sender_id is not None:
-        try:
-            now = datetime.now()
-            message_text = event.message.message  # 메시지 텍스트 가져오기
-            # 송신자 정보 가져오기
-            sender = await event.get_sender()
-            sender_name = sender.username if sender.username else "Unknown"
-            sender_id = event.sender_id
-
-            logger.info(f"Detected Message from {sender_name}: {message_text} at {now.strftime('%Y-%m-%d %H:%M:%S')}")
-            # 메시지를 파일에 저장
-            save_message_to_file(sender_name, sender_id, message_text, now.strftime("%Y-%m-%d %H:%M:%S"))
-
-            # 메세지를 나에게 포워딩
-            await telegram_singleton.client.forward_messages(telegram_singleton.my_user_id, event.message)
-            logger.info(f"Target(ID: {sender_id}, name: {sender_name}) spoke. time: {now.strftime('%Y-%m-%d %H:%M:%S')}")
-        except Exception as e:
-            logger.error(f"Error retrieving sender info: {e}")
 
 
 monitoring_task_map, event_handlers_map  = {}, {}

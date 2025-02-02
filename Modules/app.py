@@ -9,7 +9,7 @@ if current_dir not in sys.path:
     sys.path.append(current_dir)
 
 # 현재 app.py 파일의 디렉토리의 부모 디렉토리 경로를 sys.path에 추가
-parent_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
     sys.path.append(parent_dir)
 
