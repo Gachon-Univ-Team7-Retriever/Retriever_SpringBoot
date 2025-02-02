@@ -3,7 +3,7 @@ import re
 from . import telegram_singleton
 from .utils import *
 from preprocess.extractor import dictionary
-from server.db import get_mongo_client
+from server.db import get_mongo_client, db_name
 from server.logger import logger
 
 # 텔레그램 채널의 메세지가 마약 거래 채널인지 판단하는 함수
@@ -63,7 +63,7 @@ async def scrape_channel_content(invite_link):
     try:
         # MongoDB client 생성
         mongo_client = get_mongo_client()
-        db_name, collection_name = 'retriever-jisung', 'channel_data'
+        collection_name = 'channel_data'
         # 컬렉션 선택
         collection = mongo_client[db_name][collection_name]
 

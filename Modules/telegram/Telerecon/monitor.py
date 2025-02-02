@@ -1,9 +1,8 @@
 import asyncio
-from datetime import datetime
-import telethon
 from telethon import events
 from . import telegram_singleton
 from .utils import *
+from server.db import get_mongo_client, db_name
 from server.logger import logger
 
 from pymongo import MongoClient
@@ -56,10 +55,10 @@ async def monitor_channel(channel_username:str):
             if new_data:
                 try:
                     # MongoDB client 생성
-                    mongo_client = MongoClient('mongodb://admin:sherlocked@34.64.201.10:27017/')
-                    db_name, collection_name = 'retriever-jisung', 'channel_data'
+                    mongo_client = get_mongo_client()
+                    collection_name = 'channel_data'
                     # 컬렉션 선택
-                    collection = mongo_client['retriever-jisung']['channel_data']
+                    collection = mongo_client[db_name][collection_name]
                     # 데이터 삽입
                     collection.insert_one(new_data)
                 except Exception as exception:
