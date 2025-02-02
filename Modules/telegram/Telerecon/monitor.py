@@ -35,7 +35,8 @@ async def monitor_channel(channel_username:str):
                 new_data = {
                     "channelId": chat.id,
                     "sender": extract_sender_info(sender), # 송신자 정보 가져오기
-                    "msgUrl": get_message_url_from_event(event),
+                    "url": get_message_url_from_event(event),
+                    "id": event.message.id,
                     "text": message_text,
                     "timestamp": message.date, # datetime 형식의 메세지 발생 시간,
                     "media": await download_media(message, telegram_singleton.client)

@@ -4,6 +4,7 @@ import telethon
 from telethon.sync import types
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 from server.logger import logger
+from typing import Optional
 
 async def connect_channel(client: TelegramClient, invite_link):
     entity = None
@@ -87,7 +88,7 @@ def get_message_url_from_message(entity, message):
 
 
 import base64
-async def download_media(message, client):
+async def download_media(message, client) -> Optional[str]:
     if message.media and isinstance(message.media, (MessageMediaPhoto, MessageMediaDocument)):
         try:
             media_bytes = await client.download_media(

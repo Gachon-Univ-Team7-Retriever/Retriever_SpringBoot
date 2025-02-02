@@ -36,7 +36,7 @@ async def check_channel_content(invite_link) -> bool:
 
 
 # 채널 내의 데이터를 스크랩하는 함수
-async def scrape_channel_content(invite_link):
+async def scrape_channel_content(invite_link:str) -> list[dict]:
     logger.debug(f"Connecting to channel: {invite_link}")
 
     content = []
@@ -76,7 +76,7 @@ async def scrape_channel_content(invite_link):
 
     return content
 
-async def process_message(entity, client, message):
+async def process_message(entity, client, message) -> dict:
     return {
         "channelId": entity.id,
         "timestamp": message.date,
@@ -84,6 +84,7 @@ async def process_message(entity, client, message):
         "sender": extract_sender_info(message.sender),
         "views": message.views or None,
         "url": get_message_url_from_message(entity, message),
+        "id": message.id,
         "media": await download_media(message, client),
     }
 

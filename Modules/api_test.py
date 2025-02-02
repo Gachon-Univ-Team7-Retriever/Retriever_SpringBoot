@@ -2332,7 +2332,7 @@ test_set = [
         }
     },
     {
-        'enabled': False,
+        'enabled': False | True,
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
