@@ -19,3 +19,4 @@ Flask
 selenium
 pymongo
 python-dotenv
+google-cloud-storage

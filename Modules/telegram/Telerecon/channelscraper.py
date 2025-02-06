@@ -36,7 +36,7 @@ async def check_channel_content(invite_link) -> bool:
 
 
 # 채널 내의 데이터를 스크랩하는 함수
-async def scrape_channel_content(invite_link:str) -> list[dict]:
+async def scrape_channel_content(invite_link:str) -> dict:
     logger.debug(f"Connecting to channel: {invite_link}")
 
     content = []
@@ -44,7 +44,8 @@ async def scrape_channel_content(invite_link:str) -> list[dict]:
         entity = await connect_channel(telegram_singleton.client, invite_link)
         if entity is None:
             logger.warning("Failed to connect to the channel.")
-            return []
+            return {"status": "warning",
+                    "message": "Failed to connect to the channel."}
         # 메시지 스크랩
         post_count = 0
 
@@ -57,8 +58,10 @@ async def scrape_channel_content(invite_link:str) -> list[dict]:
                 logger.info(f"{post_count} Posts is scraped from {invite_link}")
 
     except Exception as e:
-        logger.error(f"An error occurred in scrape_channel_content(): {e}")
-        return []
+        msg = f"An error occurred in scrape_channel_content(): {e}"
+        logger.error(msg)
+        return {"status": "error",
+                "message": msg}
 
     try:
         # MongoDB client 생성
@@ -70,11 +73,15 @@ async def scrape_channel_content(invite_link:str) -> list[dict]:
         # 수집된 채팅을 한 번에 모두 삽입. 이때 리스트 컴프리헨션으로 깊은 복사를 하지 않으면, MongoClient가 자동으로 content에 "_id"를 추가한 뒤에 삽입하기 때문에 원본 데이터가 변형됨.
         collection.insert_many([chat.copy() for chat in content])
     except Exception as exception:
-        logger.error(f"Error occurred while inserting data into MongoDB: {exception}")
+        msg = f"Error occurred while inserting data into MongoDB: {exception}"
+        logger.error(msg)
+        return {"status": "error",
+                "message": msg}
     else:
-        logger.info(f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}")
-
-    return content
+        msg = f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}"
+        logger.info(msg)
+        return {"status": "success",
+                "message": msg}
 
 async def process_message(entity, client, message) -> dict:
     return {
@@ -90,7 +97,7 @@ async def process_message(entity, client, message) -> dict:
 
 
 # 채널 데이터 수집을 동기적으로 실행하는 동기 래퍼(wrapper) 함수
-def scrape(channel_name:str) -> list[dict]:
+def scrape(channel_name:str) -> dict:
     future = asyncio.run_coroutine_threadsafe(scrape_channel_content(channel_name), telegram_singleton.loop)
     return future.result()  # 블로킹 호출 (결과를 기다림)
 

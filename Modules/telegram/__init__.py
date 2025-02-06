@@ -15,8 +15,7 @@ def scrape_channel():
     channel_name = data['channel_name']
     logger.info("텔레그램 채널 스크랩 API 호출.")
     try:
-        content = channelscraper.scrape(channel_name)
-        return jsonify(content), 200
+        return jsonify(channelscraper.scrape(channel_name)), 200
     except Exception as e:
         logger.error(str(e))
         return jsonify({"error": str(e)}), 500

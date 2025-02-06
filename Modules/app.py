@@ -2,6 +2,10 @@ from flask import Flask, request, jsonify
 
 import os
 import sys
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv()
 
 # 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))

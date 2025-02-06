@@ -87,15 +87,16 @@ def get_message_url_from_message(entity, message):
     return None  # 채널 정보 없음
 
 
-import base64
-async def download_media(message, client) -> Optional[str]:
+from bson import Binary
+async def download_media(message, client) -> Optional[dict]:
     if message.media and isinstance(message.media, (MessageMediaPhoto, MessageMediaDocument)):
         try:
             media_bytes = await client.download_media(
                 message=message,
                 file=bytes
             )
-            return base64.b64encode(media_bytes).decode('utf-8')
+            return {"data": Binary(media_bytes),
+                    "type": message.media.document.mime_type if hasattr(message.media, "document") else None}
         except Exception as e:
             logger.error(f"Failed to download media: {e}")
             return None
