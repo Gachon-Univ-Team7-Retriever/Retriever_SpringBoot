@@ -2,7 +2,6 @@ from telethon.sync import TelegramClient, types
 from telethon.tl.functions.messages import CheckChatInviteRequest, ImportChatInviteRequest
 import telethon
 from telethon.sync import types
-from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 from server.logger import logger
 from typing import Optional
 
@@ -87,17 +86,24 @@ def get_message_url_from_message(entity, message):
     return None  # 채널 정보 없음
 
 
-from bson import Binary
-async def download_media(message, client) -> Optional[dict]:
+from telethon.tl.types import MessageMediaDocument, MessageMediaPhoto
+async def download_media(message, client) -> (Optional[bytes], Optional[str]):
     if message.media and isinstance(message.media, (MessageMediaPhoto, MessageMediaDocument)):
         try:
             media_bytes = await client.download_media(
                 message=message,
                 file=bytes
             )
-            return {"data": Binary(media_bytes),
-                    "type": message.media.document.mime_type if hasattr(message.media, "document") else None}
+            # 미디어 타입 확인
+            if isinstance(message.media, MessageMediaDocument) and hasattr(message.media, "document"):
+                media_type = message.media.document.mime_type # 문서의 MIME 타입 사용 (비디오 포함)
+            elif isinstance(message.media, MessageMediaPhoto):
+                media_type = "image/jpeg"  # 사진은 MIME 타입이 없고, 기본적으로 JPEG
+            else:
+                media_type = None
+
+            return media_bytes, media_type
         except Exception as e:
             logger.error(f"Failed to download media: {e}")
-            return None
-    return None
+            return None, None
+    return None, None

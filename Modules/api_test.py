@@ -2381,7 +2381,7 @@ test_set = [
         }
     },
     {
-        'enabled': False | True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
         'method': "POST",
         'data': {

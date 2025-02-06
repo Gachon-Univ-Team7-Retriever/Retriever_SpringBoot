@@ -35,6 +35,11 @@ async def check_channel_content(invite_link) -> bool:
     return False
 
 
+import os
+from server.google import *
+default_bucket_name = os.environ.get('GCS_BUCKET_NAME')
+
+
 # 채널 내의 데이터를 스크랩하는 함수
 async def scrape_channel_content(invite_link:str) -> dict:
     logger.debug(f"Connecting to channel: {invite_link}")
@@ -48,6 +53,9 @@ async def scrape_channel_content(invite_link:str) -> dict:
                     "message": "Failed to connect to the channel."}
         # 메시지 스크랩
         post_count = 0
+
+        # GCS 버킷에 채팅방 ID로 폴더 생성
+        create_folder(default_bucket_name, entity.id)
 
         async for message in telegram_singleton.client.iter_messages(entity):
             post_count += 1
@@ -84,6 +92,22 @@ async def scrape_channel_content(invite_link:str) -> dict:
                 "message": msg}
 
 async def process_message(entity, client, message) -> dict:
+    media_data, media_type = await download_media(message, client)
+    if media_data:
+        try:
+            media = {"url": upload_bytes_to_gcs(bucket_name=default_bucket_name,
+                                                folder_name=entity.id,
+                                                file_name=message.id,
+                                                file_bytes=media_data,
+                                                content_type=media_type),
+                     "type": media_type}
+        except Exception as e:
+            logger.error(f"An error occurred in process_message(), while uploading media to Google Cloud Storage: {e}")
+            media = None
+        else:
+            logger.info(f"Successfully uploaded media to Google Cloud Storage. (Media type: {media_type})")
+    else:
+        media = None
     return {
         "channelId": entity.id,
         "timestamp": message.date,
@@ -92,7 +116,7 @@ async def process_message(entity, client, message) -> dict:
         "views": message.views or None,
         "url": get_message_url_from_message(entity, message),
         "id": message.id,
-        "media": await download_media(message, client),
+        "media": media,
     }
 
 
@@ -106,3 +130,18 @@ def scrape(channel_name:str) -> dict:
 def check(channel_name:str) -> bool:
     future = asyncio.run_coroutine_threadsafe(check_channel_content(channel_name), telegram_singleton.loop)
     return future.result()  # 블로킹 호출 (결과를 기다림)
+
+
+from google.cloud import storage
+
+
+def upload_image_and_get_url(bucket_name, folder_name, file_name, file_bytes, content_type):
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    # GCS에 저장될 파일 경로 (폴더 포함)
+    blob = bucket.blob(f"{folder_name}/{file_name}")
+
+    # 바이트 데이터 업로드
+    blob.upload_from_string(file_bytes, content_type=content_type)
+
