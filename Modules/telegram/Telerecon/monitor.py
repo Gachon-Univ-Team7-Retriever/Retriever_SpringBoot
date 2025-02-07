@@ -24,48 +24,48 @@ async def monitor_channel(channel_username:str):
     # 새로운 이벤트 핸들러 정의 (채널별로 별도 핸들러를 생성하기 위해, 함수 내에서 동적으로 선언)
     async def event_handler(event):
         """ 메세지가 발생하면 반응하기 위한 핸들러의 비동기 함수 """
+        # MongoDB client 생성
+        mongo_client, collection_name = get_mongo_client(), 'channel_data'
+        collection = mongo_client[db_name][collection_name]  # 컬렉션 선택
+
         chat = await event.get_chat()
-        if chat and event.message: # 이벤트가 채팅방 이벤트이고, 메세지가 있을 때
+        # 이벤트가 채팅방 이벤트이고, 메세지가 있고, 해당 메세지가 아직 수집되지 않은 것일 때에만
+        if chat and event.message:
             message, sender = event.message, await event.get_sender()
             message_text = message.message  # 메시지 텍스트 가져오기
-
-            new_data = None
-            try:
-                # 삽입할 채팅 데이터 정의
-                new_data = {
-                    "channelId": chat.id,
-                    "sender": extract_sender_info(sender), # 송신자 정보 가져오기
-                    "url": get_message_url_from_event(event),
-                    "id": event.message.id,
-                    "text": message_text,
-                    "timestamp": message.date, # datetime 형식의 메세지 발생 시간,
-                    "media": await download_media(message, telegram_singleton.client)
-                }
-
-                logger.info(
-                    f"Detected Message from {new_data['sender'].get('name')}: {message_text} at {new_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
-
-                # 메세지를 나에게 포워딩
-                await telegram_singleton.client.forward_messages(telegram_singleton.my_user_id, event.message)
-                logger.info(
-                    f"Target(ID: {new_data['sender'].get('id')}, name: {new_data['sender'].get('name')}) spoke. time: {new_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
-            except Exception as exception:
-                logger.error(f"Error in telegram event handler: {exception}")
-            
-            # 모니터링한 채팅을 MongoDB에 입력
-            if new_data:
+            if not collection.find_one({"channelId": chat.id, "id": message.id}):
+                new_data = None
                 try:
-                    # MongoDB client 생성
-                    mongo_client = get_mongo_client()
-                    collection_name = 'channel_data'
-                    # 컬렉션 선택
-                    collection = mongo_client[db_name][collection_name]
-                    # 데이터 삽입
-                    collection.insert_one(new_data)
+                    # 삽입할 채팅 데이터 정의
+                    new_data = {
+                        "channelId": chat.id,
+                        "sender": extract_sender_info(sender), # 송신자 정보 가져오기
+                        "url": get_message_url_from_event(event),
+                        "id": event.message.id,
+                        "text": message_text,
+                        "timestamp": message.date, # datetime 형식의 메세지 발생 시간,
+                        "media": await download_media(message, telegram_singleton.client)
+                    }
+
+                    logger.info(
+                        f"Detected Message from {new_data['sender'].get('name')}: {message_text} at {new_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
+
+                    # 메세지를 나에게 포워딩
+                    await telegram_singleton.client.forward_messages(telegram_singleton.my_user_id, event.message)
+                    logger.info(
+                        f"Target(ID: {new_data['sender'].get('id')}, name: {new_data['sender'].get('name')}) spoke. time: {new_data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
                 except Exception as exception:
-                    logger.error(f"Error occurred while inserting data into MongoDB: {exception}")
-                else:
-                    logger.info(f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}")
+                    logger.error(f"Error in telegram event handler: {exception}")
+                if new_data:
+                    try:
+                        collection.insert_one(new_data) # 데이터 삽입
+                    except Exception as exception:
+                        logger.error(f"Error occurred while inserting data into MongoDB: {exception}")
+                    else:
+                        logger.info(f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}")
+            else:
+                logger.warning(
+                    f"MongoDB collection already has same unique index of a chat(channelId: {chat.id}, id: {message.id})")
 
     try:
         # 채널 엔티티 가져오기

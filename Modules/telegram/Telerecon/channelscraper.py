@@ -43,8 +43,6 @@ default_bucket_name = os.environ.get('GCS_BUCKET_NAME')
 # 채널 내의 데이터를 스크랩하는 함수
 async def scrape_channel_content(invite_link:str) -> dict:
     logger.debug(f"Connecting to channel: {invite_link}")
-
-    content = []
     try:
         entity = await connect_channel(telegram_singleton.client, invite_link)
         if entity is None:
@@ -57,13 +55,21 @@ async def scrape_channel_content(invite_link:str) -> dict:
         # GCS 버킷에 채팅방 ID로 폴더 생성
         create_folder(default_bucket_name, entity.id)
 
+        # MongoDB client 생성
+        mongo_client, collection_name = get_mongo_client(), 'channel_data'
+        collection = mongo_client[db_name][collection_name]  # 컬렉션 선택
+
         async for message in telegram_singleton.client.iter_messages(entity):
             post_count += 1
-            post_data = await process_message(entity, telegram_singleton.client, message)
-            content.append(post_data)
-
             if post_count % 10 == 0:
                 logger.info(f"{post_count} Posts is scraped from {invite_link}")
+
+            # channelId 필드와 id 필드를 기준으로 이미 채팅이 수집되었는지 검사한 후, 아직 수집되지 않았을 경우에만 삽입
+            if not collection.find_one({"channelId": entity.id, "id": message.id}):
+                post_data = await process_message(entity, telegram_singleton.client, message)
+                collection.insert_one(post_data)
+            else:
+                logger.warning(f"MongoDB collection already has same unique index of a chat(channelId: {entity.id}, id: {message.id})")
 
     except Exception as e:
         msg = f"An error occurred in scrape_channel_content(): {e}"
@@ -71,25 +77,12 @@ async def scrape_channel_content(invite_link:str) -> dict:
         return {"status": "error",
                 "message": msg}
 
-    try:
-        # MongoDB client 생성
-        mongo_client = get_mongo_client()
-        collection_name = 'channel_data'
-        # 컬렉션 선택
-        collection = mongo_client[db_name][collection_name]
-
-        # 수집된 채팅을 한 번에 모두 삽입. 이때 리스트 컴프리헨션으로 깊은 복사를 하지 않으면, MongoClient가 자동으로 content에 "_id"를 추가한 뒤에 삽입하기 때문에 원본 데이터가 변형됨.
-        collection.insert_many([chat.copy() for chat in content])
-    except Exception as exception:
-        msg = f"Error occurred while inserting data into MongoDB: {exception}"
-        logger.error(msg)
-        return {"status": "error",
-                "message": msg}
     else:
         msg = f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}"
         logger.info(msg)
         return {"status": "success",
                 "message": msg}
+
 
 async def process_message(entity, client, message) -> dict:
     media_data, media_type = await download_media(message, client)
