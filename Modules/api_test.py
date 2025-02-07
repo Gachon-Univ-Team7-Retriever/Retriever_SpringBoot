@@ -2348,19 +2348,19 @@ test_set = [
         }
     },
     {
-        'enabled': False,
+        'enabled': False | True,
         'url': "http://127.0.0.1:5000/crawl/links",
         'method': "POST",
         'data': {
             "queries": [
-                "t.me 아이스",
+                # "t.me 아이스",
                 "t.me 떨",
-                "t.me 케이",
-                "t.me LSD",
-                "t.me 캔디",
-                "t.me 빙두"
+                # "t.me 케이",
+                # "t.me LSD",
+                # "t.me 캔디",
+                # "t.me 빙두"
             ],
-            "max_results": 10
+            "max_results": 20
         }
     },
     {
@@ -2381,7 +2381,7 @@ test_set = [
         }
     },
     {
-        'enabled': False | True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
         'method': "POST",
         'data': {
