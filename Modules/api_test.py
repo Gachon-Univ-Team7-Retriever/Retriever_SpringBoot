@@ -2336,7 +2336,7 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox2"
+            "channel_key": "Hyde_Sandbox2"
         }
     },
     {
@@ -2344,11 +2344,11 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/check-suspicious",
         'method': "POST",
         'data': {
-            "channel_name": "+rFf0i3HFC4tiOGE1"
+            "channel_key": "+rFf0i3HFC4tiOGE1"
         }
     },
     {
-        'enabled': False | True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/crawl/links",
         'method': "POST",
         'data': {
@@ -2376,7 +2376,7 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox",
+            "channel_key": "Hyde_Sandbox",
             "how": "start"
         }
     },
@@ -2385,7 +2385,7 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox2",
+            "channel_key": "Hyde_Sandbox2",
             "how": "start"
         }
     },
@@ -2394,7 +2394,7 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox",
+            "channel_key": "Hyde_Sandbox",
             "how": "stop"
         }
     },
@@ -2403,10 +2403,18 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox2",
+            "channel_key": "Hyde_Sandbox2",
             "how": "stop"
         }
-    }
+    },
+    {
+        'enabled': False | True,
+        'url': "http://127.0.0.1:5000/telegram/channel/info",
+        'method': "POST",
+        'data': {
+            "channel_key": "Hyde_Sandbox2"
+        }
+    },
 ]
 
 result = list()
