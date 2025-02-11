@@ -2408,11 +2408,27 @@ test_set = [
         }
     },
     {
-        'enabled': False | True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/info",
         'method': "POST",
         'data': {
             "channel_key": "Hyde_Sandbox2"
+        }
+    },
+    {
+        'enabled': False,
+        'url': "http://127.0.0.1:5000/telegram/channel/info",
+        'method': "POST",
+        'data': {
+            "channel_key": "frozen_talk"
+        }
+    },
+    {
+        'enabled': False | True,
+        'url': "http://127.0.0.1:5000/telegram/channel/scrape",
+        'method': "POST",
+        'data': {
+            "channel_key": 1890652954
         }
     },
 ]

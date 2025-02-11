@@ -50,7 +50,7 @@ def disconnect_channel():
 def scrape_channel():
     logger.info("텔레그램 채널 스크랩 API 호출됨.")
     data = request.json
-    if not data or 'channel_name' not in data:
+    if not data or 'channel_key' not in data:
         return jsonify({"error": "Please provide 'channel_key' in the JSON request body."}), 400
 
     channel_key = data['channel_key']
@@ -80,7 +80,7 @@ def monitor_channel():
     logger.info("텔레그램 채널 모니터링 API 호출됨.")
     data = request.json
     if not data or 'channel_key' not in data:
-        return jsonify({"error": "Please provide 'channel_name' in the JSON request body."}), 400
+        return jsonify({"error": "Please provide 'channel_key' in the JSON request body."}), 400
     elif 'how' not in data:
         return jsonify({"error": "Please provide 'how' in the JSON request body."}), 400
 

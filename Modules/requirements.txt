@@ -1,4 +1,22 @@
+# 범용 패키지
+datetime
+python-dotenv
+
+# 웹 크롤링 기능에 필요한 패키지
+selenium
+
+# Flask 서버 작동에 필요한 패키지
+Flask
+google-cloud-storage
+
+# MongoDB 데이터베이스 운용에 필요한 패키지
+pymongo
+
+# Telegraper 사용에 필요한 패키지
 telethon
+beautifulsoup4
+
+# Telerecon 라이브러리 사용에 필요한 패키지(사용되지 않음)
 pandas
 reportlab
 matplotlib
@@ -7,16 +25,18 @@ tzlocal
 Pillow
 folium
 spaCy
-datetime
 colorama
 cryptg
 validate_email_address
 networkx
 openpyxl
 transformers
-beautifulsoup4
-Flask
-selenium
-pymongo
-python-dotenv
-google-cloud-storage
+
+# AI 챗봇에 필요한 패키지
+langchain
+langchain-community
+faiss-gpu # Vector DB를 FAISS로 사용할 경우 필요. Python 버전에 따라 faiss-cpu로 대체해야 함.
+faiss-cpu # Vector DB를 FAISS로 사용할 경우 필요. Python 버전에 따라 faiss-gpu로 대체해야 함.
+motor # langchain의 MongodbLoader를 사용할 경우 필요.
+pymupdf # langhcain-community의 PyMuPDFLoader에 필요하나 추후 필요여부에 따라 제거될 수 있음
+langchain-teddynote # langchain 관련 기능을 보다 더 편리하게 사용하기 위한 목적으로 만들어진 teddynote의 패키지. 필요여부에 따라 제거 가능
