@@ -5,7 +5,7 @@ import os
 default_bucket_name = os.environ.get('GCS_BUCKET_NAME')
 
 from preprocess.extractor import dictionary
-from server.db import get_mongo_client, db_name
+from server.db import get_mongo_client, DB
 from server.logger import logger
 from server.google import *
 
@@ -59,8 +59,8 @@ class ChannelContentMethods:
             create_folder(default_bucket_name, entity.id)
 
             # MongoDB client 생성
-            mongo_client, collection_name = get_mongo_client(), 'channel_data'
-            collection = mongo_client[db_name][collection_name]  # 컬렉션 선택
+            mongo_client, collection_name = get_mongo_client(), DB.COLLECTION.CHANNEL.DATA
+            collection = mongo_client[DB.NAME][collection_name]  # 컬렉션 선택
 
             async for message in self.client.iter_messages(entity):
                 post_count += 1
@@ -80,7 +80,7 @@ class ChannelContentMethods:
                     "message": msg}
 
         else:
-            msg = f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}"
+            msg = f"Archived a new chat in MongoDB - DB: {DB.NAME}, collection: {collection_name}"
             logger.info(msg)
             return {"status": "success",
                     "message": msg}

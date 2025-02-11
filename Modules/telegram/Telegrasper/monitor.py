@@ -2,7 +2,7 @@ import asyncio
 import typing
 from telethon import events
 from .utils import *
-from server.db import get_mongo_client, db_name
+from server.db import get_mongo_client, DB
 from server.logger import logger
 
 if typing.TYPE_CHECKING:
@@ -28,8 +28,8 @@ class ChannelContentMonitorMethods:
         async def event_handler(event):
             """ 메세지가 발생하면 반응하기 위한 핸들러의 비동기 함수 """
             # MongoDB client 생성
-            mongo_client, collection_name = get_mongo_client(), 'channel_data'
-            collection = mongo_client[db_name][collection_name]  # 컬렉션 선택
+            mongo_client, collection_name = get_mongo_client(), DB.COLLECTION.CHANNEL.DATA
+            collection = mongo_client[DB.NAME][collection_name]  # 컬렉션 선택
     
             chat = await event.get_chat()
             # 이벤트가 채팅방 이벤트이고, 메세지가 있고, 해당 메세지가 아직 수집되지 않은 것일 때에만
@@ -65,7 +65,7 @@ class ChannelContentMonitorMethods:
                         except Exception as exception:
                             logger.error(f"Error occurred while inserting data into MongoDB: {exception}")
                         else:
-                            logger.info(f"Archived a new chat in MongoDB - DB: {db_name}, collection: {collection_name}")
+                            logger.info(f"Archived a new chat in MongoDB - DB: {DB.NAME}, collection: {collection_name}")
                 else:
                     logger.warning(
                         f"MongoDB collection already has same unique index of a chat(channelId: {chat.id}, id: {message.id})")

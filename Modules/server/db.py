@@ -9,4 +9,13 @@ def get_mongo_client() -> pymongo.MongoClient:
                                f"@{os.environ.get('DB_IP')}"
                                f":{os.environ.get('DB_PORT')}/")
 
-db_name = os.environ.get('DB_NAME')
+class Database:
+    class Collection:
+        class Channel:
+            INFO = "channel_info"
+            DATA = "channel_data"
+            SIMILARITY = "channel_similarity"
+        CHANNEL = Channel
+    COLLECTION = Collection
+    NAME = os.environ.get('DB_NAME')
+DB = Database
