@@ -1,7 +1,15 @@
+# IDE의 관리 파일 무시
 .idea
-*.log
-test.py
+
 # __pycache__ 폴더 및 모든 .pyc 파일 무시
 __pycache__/
 *.pyc
+
+# 시스템 환경 변수 파일 무시
 .env
+
+# 서버 로그 파일 무시
+*.log
+
+# Flask API 서버의 테스트 코드 무시
+test.py
