@@ -142,6 +142,7 @@ class ModuleFilter(logging.Filter):
 # 패키지 또는 모듈 이름으로 필터링 -> "Modules" 디렉토리에서 __file__ 속성을 가져와서 활용.
 from Modules import __file__ as ROOT_FILE_DIR
 MODULE_NAME = os.path.dirname(ROOT_FILE_DIR)
+print(f"Root directory of logging server", MODULE_NAME)
 
 # 로그를 파일에 기록하는 Handler
 os.makedirs(os.path.join(os.path.dirname(LOG_PATH), "logs"), exist_ok=True)

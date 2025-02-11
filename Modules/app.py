@@ -2,11 +2,20 @@ from flask import Flask, request, jsonify
 
 import os
 import sys
+from dotenv import load_dotenv
+
+# .env 파일 로드
+load_dotenv()
 
 # 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
+
+# 현재 app.py 파일의 디렉토리의 부모 디렉토리 경로를 sys.path에 추가
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
 
 from crawl import crawl_bp
 from preprocess import preprocess_bp

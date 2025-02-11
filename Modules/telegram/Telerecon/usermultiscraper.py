@@ -68,7 +68,7 @@ async def scrape_user_messages(channel_name, target_user, user_directory, downlo
                     if post.media and download_media:
                         media_filename = f'media_{post.id}'
                         media_path = os.path.join(media_directory, media_filename)
-                        await client.download_media(post, file=media_path)
+                        await client.download_media(post, )
 
                     content.append(
                         (text, date, username, first_name, last_name, user_id, views, message_url, channel_name, media))

@@ -19,11 +19,14 @@ def google_search(query:str, num_results:int=10, api_key:str=API_KEY, search_eng
         "key": api_key,
         "cx": search_engine_id,
         "q": query,
+        "gl": "kr", # 지역을 한국으로 설정 (검색 결과 향상을 목표로 했으나 달라지는 게 없어 보임)
+        "hl": "ko", # 지역을 한국으로 설정 (검색 결과 향상을 목표로 했으나 달라지는 게 없어 보임)
         "num": min(num_results, 10),  # 최대 10개까지 가능
         "start": 1  # 검색 시작 위치
     }
 
     while len(urls) + len(telegrams) < num_results:
+        # 검색을 수행하고 결과를 수신
         response = requests.get(url, params=params)
         data = response.json()
 
@@ -47,25 +50,23 @@ def google_search(query:str, num_results:int=10, api_key:str=API_KEY, search_eng
 
         params["start"] += 10  # 다음 페이지로 이동
 
-    return {
-        "urls": urls,
-        "telegrams": telegrams
-    }
+    return urls, telegrams
 
 
 # 통합 웹 검색
+from utils import merge_lists_remove_duplicates
 def search_links(queries: list[str], max_results: int) -> dict:  # 만약 로컬 파일에 결과를 저장하고 싶다면 save_file을 True로 변경
-    # 중복 제거를 위한 집합 사용
-    all_urls, all_telegrams = set(), set()
-
     logger.info(f'검색어 {len(queries)}개에 대한 검색 시작...')
     # 모든 검색어에 대한 검색 수행
+    all_urls, all_telegrams = {}, {}
     for query in queries:
         logger.debug(f'검색어 "{query}"에 대한 검색 시작...')
-        search_result = google_search(query, max_results)
-        all_urls.update(search_result['urls'])  # URL 합집합
-        all_telegrams.update(search_result['telegrams'])  # 텔레그램 채널 이름 합집합
-        logger.debug(f'검색어 "{query}"에 대한 검색 결과: URL {len(search_result["urls"])}개, Telegram 채널 {len(search_result["telegrams"])}개')
+        # 검색 후 값 저장
+        urls, telegrams = google_search(query, max_results)
+        all_urls[query], all_telegrams[query] = urls, telegrams
+        logger.debug(f'검색어 "{query}"에 대한 검색 결과: URL {len(urls)}개, Telegram 채널 {len(telegrams)}개')
+
+    all_urls, all_telegrams = merge_lists_remove_duplicates(all_urls.values()), merge_lists_remove_duplicates(all_telegrams.values())
 
     if not all_urls:
         logger.info(f"검색어 {len(queries)}개에 대한 전체 검색 결과가 없습니다.")

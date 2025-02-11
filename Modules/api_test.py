@@ -4,7 +4,7 @@ import json
 
 test_set = [
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/preprocess/extract/web-promotion",
         'method': "POST",
         'data': {
@@ -2324,7 +2324,7 @@ test_set = [
         }
     },
     {
-        'enabled': True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/preprocess/extract/web-promotion",
         'method': "POST",
         'data': {
@@ -2336,7 +2336,7 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
-            "channel_name": "Hyde_Sandbox"
+            "channel_key": "Hyde_Sandbox2"
         }
     },
     {
@@ -2344,7 +2344,7 @@ test_set = [
         'url': "http://127.0.0.1:5000/telegram/channel/check-suspicious",
         'method': "POST",
         'data': {
-            "channel_name": "+rFf0i3HFC4tiOGE1"
+            "channel_key": "+rFf0i3HFC4tiOGE1"
         }
     },
     {
@@ -2353,14 +2353,14 @@ test_set = [
         'method': "POST",
         'data': {
             "queries": [
-                "t.me 아이스",
+                # "t.me 아이스",
                 "t.me 떨",
-                "t.me 케이",
-                "t.me LSD",
-                "t.me 캔디",
-                "t.me 빙두"
+                # "t.me 케이",
+                # "t.me LSD",
+                # "t.me 캔디",
+                # "t.me 빙두"
             ],
-            "max_results": 10
+            "max_results": 20
         }
     },
     {
@@ -2370,7 +2370,51 @@ test_set = [
         'data': {
             "link": "https://www.teia.co.kr/25/?q=YToyOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjtzOjQ6InBhZ2UiO2k6MTI7fQ%3D%3D&bmode=view&idx=139766712&t=board&category=0JV5F0VX73"
         }
-    }
+    },
+    {
+        'enabled': False,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_key": "Hyde_Sandbox",
+            "how": "start"
+        }
+    },
+    {
+        'enabled': False,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_key": "Hyde_Sandbox2",
+            "how": "start"
+        }
+    },
+    {
+        'enabled': False,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_key": "Hyde_Sandbox",
+            "how": "stop"
+        }
+    },
+    {
+        'enabled': False,
+        'url': "http://127.0.0.1:5000/telegram/channel/monitoring",
+        'method': "POST",
+        'data': {
+            "channel_key": "Hyde_Sandbox2",
+            "how": "stop"
+        }
+    },
+    {
+        'enabled': False | True,
+        'url': "http://127.0.0.1:5000/telegram/channel/info",
+        'method': "POST",
+        'data': {
+            "channel_key": "Hyde_Sandbox2"
+        }
+    },
 ]
 
 result = list()
@@ -2393,7 +2437,11 @@ for bundle in test_set:
         request_and_response['response'] = response.json()
         print(f"{bundle['url']} 에 대한 테스트 완료.")
     else:
-        request_and_response['response'] = f"{response.status_code}: {response.reason}"
+        try:
+            request_and_response['response'] = response.json()
+        except Exception as e:
+            print(f"json 형태의 응답이 아님!")
+            request_and_response['response'] = f"{response.status_code}: {response.reason}"
         print(f"{bundle['url']} 에 대한 테스트 오류 - {response.status_code}: {response.reason}")
 
 with open("test_result.json", "w", encoding="utf-8") as file:
