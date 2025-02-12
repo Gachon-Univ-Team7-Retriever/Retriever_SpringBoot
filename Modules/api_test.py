@@ -2424,11 +2424,19 @@ test_set = [
         }
     },
     {
-        'enabled': False | True,
+        'enabled': False,
         'url': "http://127.0.0.1:5000/telegram/channel/scrape",
         'method': "POST",
         'data': {
             "channel_key": 1890652954
+        }
+    },
+    {
+        'enabled': False | True,
+        'url': "http://127.0.0.1:5000/watson/c/1890652954",
+        'method': "POST",
+        'data': {
+            "question": "이 채널에서 마약이 판매되는 지역은 어디지?",
         }
     },
 ]

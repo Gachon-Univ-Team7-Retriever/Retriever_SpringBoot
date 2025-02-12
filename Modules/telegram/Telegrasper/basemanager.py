@@ -65,21 +65,22 @@ class TelegramBaseManager:
         return cls._instance
 
     def __init__(self):
-        # 현재 실행 흐름이 백그라운드 스레드일 경우, 루프를 만들고 클라이언트를 초기화한다.
-        if threading.current_thread() is not threading.main_thread():
-            background_loop = asyncio.new_event_loop()  # 백그라운드 스레드에서 새 이벤트 루프 생성
-            asyncio.set_event_loop(background_loop)  # 새 루프를 설정
+        with self._lock:
+            # 현재 실행 흐름이 백그라운드 스레드일 경우, 루프를 만들고 클라이언트를 초기화한다.
+            if threading.current_thread() is not threading.main_thread():
+                background_loop = asyncio.new_event_loop()  # 백그라운드 스레드에서 새 이벤트 루프 생성
+                asyncio.set_event_loop(background_loop)  # 새 루프를 설정
 
-            self.loop = background_loop
-            self.client = background_loop.run_until_complete(self.start_client())
-            self.my_user_id = background_loop.run_until_complete(self.get_me())
-        else:
-            # 만약 현재 실행 흐름이 백그라운드 스레드가 아닐 경우(메인 스레드일 경우), 기존 값이 있으면 그대로 두고 없으면 None으로 초기화한다.
-            self.client = getattr(self, "client", None)
-            self.my_user_id = getattr(self, "my_user_id", None)
-            self.loop = getattr(self, "loop", None)
+                self.loop = background_loop
+                self.client = background_loop.run_until_complete(self.start_client())
+                self.my_user_id = background_loop.run_until_complete(self.get_me())
+            else:
+                # 만약 현재 실행 흐름이 백그라운드 스레드가 아닐 경우(메인 스레드일 경우), 기존 값이 있으면 그대로 두고 없으면 None으로 초기화한다.
+                self.client = getattr(self, "client", None)
+                self.my_user_id = getattr(self, "my_user_id", None)
+                self.loop = getattr(self, "loop", None)
 
-        super().__init__()
+            super().__init__()
 
     async def start_client(self):
         """ 텔레그램 클라이언트를 초기화하고 시작, 초기화된 클라이언트를 반환하는 메서드 """
