@@ -44,10 +44,10 @@ class ChannelContentMethods:
 
 
     # 채널 내의 데이터를 스크랩하는 함수
-    async def scrape_channel_content(self:'TelegramManager', invite_link:typing.Union[int, str]) -> dict:
-        logger.debug(f"Connecting to channel: {invite_link}")
+    async def scrape_channel_content(self:'TelegramManager', channel_key:typing.Union[int, str]) -> dict:
+        logger.debug(f"Connecting to channel: {channel_key}")
         try:
-            entity = await self.connect_channel(invite_link)
+            entity = await self.connect_channel(channel_key)
             if entity is None:
                 logger.warning("Failed to connect to the channel.")
                 return {"status": "warning",
@@ -65,7 +65,7 @@ class ChannelContentMethods:
             async for message in self.client.iter_messages(entity):
                 post_count += 1
                 if post_count % 10 == 0:
-                    logger.info(f"{post_count} Posts is scraped from {invite_link}")
+                    logger.info(f"{post_count} Posts is scraped from {channel_key}")
 
                 # channelId 필드와 id 필드를 기준으로 이미 채팅이 수집되었는지 검사한 후, 아직 수집되지 않았을 경우에만 삽입
                 if not collection.find_one({"channelId": entity.id, "id": message.id}):
@@ -80,7 +80,7 @@ class ChannelContentMethods:
                     "message": msg}
 
         else:
-            msg = f"Archived a new chat in MongoDB - DB: {DB.NAME}, collection: {collection_name}"
+            msg = f"Archived all chats for the channel(Channel key: {channel_key}) in MongoDB - DB: {DB.NAME}, collection: {collection_name}"
             logger.info(msg)
             return {"status": "success",
                     "message": msg}

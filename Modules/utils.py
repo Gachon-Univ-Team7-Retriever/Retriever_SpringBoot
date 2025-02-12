@@ -1,5 +1,6 @@
-from itertools import zip_longest
+from flask import jsonify
 
+from itertools import zip_longest
 
 def merge_lists_remove_duplicates(lists):
     seen = set()  # 중복 체크용
@@ -13,3 +14,11 @@ def merge_lists_remove_duplicates(lists):
                 result.append(item)
 
     return result
+
+
+def confirm_request(data, required: list):
+    if not data:
+        return jsonify({"error": "Please provide JSON request body."}), 400
+    for key in required:
+        if key not in data:
+            return jsonify({"error": f"Please provide '{key}' in the JSON request body."}), 400
