@@ -41,7 +41,7 @@ async def main():
                 if id is not None:
                     try:
                         ent = await client.get_entity(id)
-                        target_channel_entity = await client.get_entity(message.to_id._channel_id)
+                        target_channel_entity = await client.get_entity(message.to_id.channel_id)
                         target_channel_title = target_channel_entity.title
                         l.append([ent.title, target_channel_title])
                         source_url = f"https://t.me/{ent.username}"

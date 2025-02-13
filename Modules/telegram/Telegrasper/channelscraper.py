@@ -111,7 +111,7 @@ async def process_message(entity, client, message, collection) -> None:
             logger.error(f"An error occurred in process_message(), while uploading media to Google Cloud Storage: {e}")
             media = None
         else:
-            logger.info(f"Successfully uploaded media to Google Cloud Storage. (Media type: {media_type})")
+            logger.debug(f"Successfully uploaded media to Google Cloud Storage. (Media type: {media_type})")
     else:
         media = None
     post_data = {

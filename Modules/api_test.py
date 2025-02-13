@@ -2433,9 +2433,11 @@ test_set = [
     },
     {
         'enabled': False | True,
-        'url': "http://127.0.0.1:5000/watson/c/1890652954",
+        'url': "http://127.0.0.1:5000/watson/c",
         'method': "POST",
         'data': {
+            "channel_ids": [1890652954],
+            "scope": "global",
             "question": "이 채널에서 마약이 판매되는 지역은 어디지?",
         }
     },
