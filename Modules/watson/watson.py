@@ -64,11 +64,11 @@ class Watson:
                 self._update_vectorstore()
                 return
 
-            self.channel_id = channel_id
-            self.embedding = OpenAIEmbeddings()  # 임베딩(Embedding) 생성
-            self.llm = ChatOpenAI(model_name="gpt-4o", temperature=0)  # 언어모델(LLM) 생성
+            self._channel_id = channel_id
+            self._embedding = OpenAIEmbeddings()  # 임베딩(Embedding) 생성
+            self._llm = ChatOpenAI(model_name="gpt-4o", temperature=0)  # 언어모델(LLM) 생성
 
-            self.vectorstore, self.chain = None, None
+            self._vectorstore, self._chain = None, None
             self._vectorstore_path = os.path.join(os.path.dirname(__file__),
                                                   str(channel_id))  # watson/vectorstore/<channel id> 위치에 벡터스토어 저장.
             self._update_db()
@@ -79,8 +79,8 @@ class Watson:
             chat_collection = get_mongo_collection(DB.NAME, DB.COLLECTION.CHANNEL.DATA)
             chatbot_collection = get_mongo_collection(DB.NAME, DB.COLLECTION.CHATBOT)
             # 채널 ID를 기준으로 모든 채팅을 찾아서 각 채팅의 채팅 ID를 리스트로 생성
-            chat_ids = [doc["id"] for doc in chat_collection.find({"channelId": self.channel_id})]
-            bot_references = chatbot_collection.find_one({"channelId": self.channel_id}).get("chatIds")
+            chat_ids = [doc["id"] for doc in chat_collection.find({"channelId": self._channel_id})]
+            bot_references = chatbot_collection.find_one({"channelId": self._channel_id}).get("chatIds")
             """
                 다음의 경우에 RAG vectorstore를 재생성.
                 1. 로컬에 저장된 벡터스토어가 없을 때
@@ -110,9 +110,9 @@ class Watson:
         try:
             # MongoDB client 생성 및 컬렉션 선택
             chatbot_collection = get_mongo_collection(DB.NAME, DB.COLLECTION.CHATBOT)
-            if not chatbot_collection.find_one({"channelId": self.channel_id}):
+            if not chatbot_collection.find_one({"channelId": self._channel_id}):
                 chatbot_collection.insert_one({
-                    "channelId": self.channel_id,
+                    "channelId": self._channel_id,
                     "updatedAt": datetime.now(),
                     "chatIds": []
                 })
@@ -135,26 +135,26 @@ class Watson:
         """
         try:
             # load_vectorstore가 호출되었다면 변경사항이 없다는 뜻이므로, 객체에 저장된 vectorstore가 있다면 재사용 가능
-            if not self.vectorstore:
-                self.vectorstore = FAISS.load_local(self._vectorstore_path, self.embedding, allow_dangerous_deserialization=True)
+            if not self._vectorstore:
+                self._vectorstore = FAISS.load_local(self._vectorstore_path, self._embedding, allow_dangerous_deserialization=True)
         except Exception as e:
             logger.error(f"An error occurred while loading vectorstore from local: {e}")
 
     def _save_vectorstore(self):
         try:
-            self.vectorstore.save_local(self._vectorstore_path)
+            self._vectorstore.save_local(self._vectorstore_path)
         except Exception as e:
             logger.error(f"An error occurred while saving vectorstore to local: {e}")
 
     def _build_vectorstore(self):
         try:
             # 단계 1: 문서 로드(Load Documents)
-            logger.debug(f"Loading chat data from MongoDB. Channel ID: {self.channel_id}")
+            logger.debug(f"Loading chat data from MongoDB. Channel ID: {self._channel_id}")
             loader = MongodbLoader(
                 connection_string=get_mongo_connection_string(),
                 db_name=DB.NAME,
                 collection_name=DB.COLLECTION.CHANNEL.DATA,
-                filter_criteria={"channelId": self.channel_id},  # 데이터베이스에서 조회할 기준 (쿼리)
+                filter_criteria={"channelId": self._channel_id},  # 데이터베이스에서 조회할 기준 (쿼리)
                 field_names=("text",),
                 metadata_names=("id", "timestamp", "channelId", "views", "url"),  # 메타데이터로 지정할 필드 목록
             )
@@ -162,24 +162,24 @@ class Watson:
             ids = [doc.metadata['id'] for doc in docs]
 
             # 단계 2: 문서 분할(Split Documents)
-            logger.debug(f"Splitting loaded chat documents from MongoDB. Channel ID: {self.channel_id}")
+            logger.debug(f"Splitting loaded chat documents from MongoDB. Channel ID: {self._channel_id}")
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
             split_documents = text_splitter.split_documents(docs)
 
             # 단계 3: 임베딩(Embedding) 생성
             # 임베딩을 생성한다.
-            # embedding = OpenAIEmbeddings()  # -> self.embedding 으로 저장한다음 바로 참조하기 때문에 생략됨
+            # embedding = OpenAIEmbeddings()  # -> self._embedding 으로 저장한다음 바로 참조하기 때문에 생략됨
 
             # 단계 4: DB 생성(Create DB) 및 저장
             # 벡터스토어를 생성하고, 저장한다.
-            logger.debug(f"Creating and Saving the vectorstore. Channel ID: {self.channel_id}")
-            self.vectorstore = FAISS.from_documents(documents=split_documents, embedding=self.embedding)
+            logger.debug(f"Creating and Saving the vectorstore. Channel ID: {self._channel_id}")
+            self._vectorstore = FAISS.from_documents(documents=split_documents, embedding=self._embedding)
             self._save_vectorstore()
 
             # chatbot collection에서 chatIds를 수집된 채팅의 ID로 업데이트
-            logger.debug(f"Updating chatbot metadata. Channel ID: {self.channel_id}")
+            logger.debug(f"Updating chatbot metadata. Channel ID: {self._channel_id}")
             chatbot_collection = get_mongo_collection(DB.NAME, DB.COLLECTION.CHATBOT)
-            chatbot_collection.update_one({"channelId": self.channel_id},
+            chatbot_collection.update_one({"channelId": self._channel_id},
                                           {"$set": {"chatIds": ids, "updatedAt": datetime.now()}})
         except Exception as e:
             logger.error(f"An error occurred while building vectorstore: {e}")
@@ -188,7 +188,7 @@ class Watson:
         try:
             # 단계 5: 검색기(Retriever) 생성
             # 문서에 포함되어 있는 정보를 검색하고 생성한다.
-            retriever = self.vectorstore.as_retriever()
+            retriever = self._vectorstore.as_retriever()
 
             # 단계 6: 프롬프트 생성(Create Prompt)
             # 프롬프트를 생성한다.
@@ -196,13 +196,13 @@ class Watson:
 
             # 단계 7: 언어모델(LLM) 생성
             # 모델(LLM)을 생성한다.
-            # llm = ChatOpenAI(model_name="gpt-4o", temperature=0) -> self.llm으로 바로 참조하기 때문에 생략됨.
+            # llm = ChatOpenAI(model_name="gpt-4o", temperature=0) -> self._llm으로 바로 참조하기 때문에 생략됨.
 
             # 단계 8: 체인(Chain) 생성
-            self.chain = (
+            self._chain = (
                     {"context": retriever, "question": RunnablePassthrough()}  # 1. [prompt에 들어갈 값](딕셔너리 형태)
                     | self.prompt_template  # 2. context와 question이 들어갈 [프롬프트]
-                    | self.llm  # 3. 프롬프트가 들어갈 [LLM]
+                    | self._llm  # 3. 프롬프트가 들어갈 [LLM]
                     | StrOutputParser()  # 4. LLM이 내놓은 결과를 정리해줄 [Parser]
             )  # 배경지식과 질문 -> 프롬프트 -> LLM -> 결과 전처리 Parser 의 4단계 chain이 생성됨.
         except Exception as e:
@@ -212,6 +212,6 @@ class Watson:
     # 문서에 대한 질의를 입력하고, 답변을 출력한다.
     def ask(self, question: str):
         # chain이 있으면 chain을 실행하고 답변을 반환. chain이 없으면 에러 메세지 반환.
-        answer = self.chain.invoke(question) if self.chain else self.error_msg_for_empty_data
+        answer = self._chain.invoke(question) if self._chain else self.error_msg_for_empty_data
         logger.info(f"Chatbot answered to a question. Q: '{question}', A: '{answer}'")
         return answer
