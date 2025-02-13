@@ -139,10 +139,12 @@ class Watson(metaclass=AutoCreateInstances):
                     self._bot_id = generate_integer_id64(existing_ids=self._instances.keys())
                     self.scope = scope
                     self.chats = {}
-                    if not scope == "global": # scope가 global이면 channel_ids는 무시하고 chats는 빈 딕셔너리로 유지.
-                        for channel_id in channel_ids:
-                            # 채팅 데이터 collection에서, 참고하려는 채널에서 송수신된 모든 채팅의 채팅 id를 채널 id로 나누어서 저장.
-                            self.chats[str(channel_id)] = [chat.get('id') for chat in chat_collection.find({"channelId": channel_id})]
+                    for channel_id in channel_ids:
+                        # 채팅 데이터 collection에서, 참고하려는 채널에서 송수신된 모든 채팅의 채팅 id를 채널 id로 나누어서 저장.
+                        # 이 때, scope가 "global"이라면 모든 채널 ID를 불러와서 저장.
+                        self.chats[str(channel_id)] = [chat.get('id') for chat in chat_collection.find(
+                            {} if self.scope == "global" else {"channelId": channel_id}
+                        )]
                     logger.debug(f"새로운 챗봇을 생성했습니다. Chatbot ID: {self._bot_id}")
 
                 self._update_db() # MongoDB에서 현재 챗봇의 정보 업데이트 (없을 경우 신규 생성)
@@ -238,7 +240,7 @@ class Watson(metaclass=AutoCreateInstances):
         try:
             channel_ids = list(map(int, self.chats.keys())) # chats의 key가 str 형으로 저장되어 있기 때문에, int로 변환한 뒤 검색
             # 단계 1: 문서 로드(Load Documents)
-            logger.debug(f"Loading chat data from MongoDB. Channel IDs: {channel_ids}")
+            logger.debug(f"Loading chat data from MongoDB. Channel IDs: {channel_ids}, scope: {self.scope}")
             loader = MongodbLoader(
                 connection_string=get_mongo_connection_string(),
                 db_name=DB.NAME,
@@ -252,11 +254,11 @@ class Watson(metaclass=AutoCreateInstances):
             docs = loader.load()
             if not docs:
                 self._vectorstore = None
-                logger.warning(f"There is no channel data found at DB for the bot. Channel IDs: {channel_ids}")
+                logger.warning(f"There is no channel data found at DB for the bot. Channel IDs: {channel_ids}, scope: {self.scope}")
                 return
 
             # 단계 2: 문서 분할(Split Documents)
-            logger.debug(f"Splitting loaded chat documents from MongoDB. Channel IDs: {channel_ids}")
+            logger.debug(f"Splitting loaded chat documents from MongoDB. Channel IDs: {channel_ids}, scope: {self.scope}")
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
             split_documents = text_splitter.split_documents(docs)
 
@@ -266,12 +268,12 @@ class Watson(metaclass=AutoCreateInstances):
 
             # 단계 4: DB 생성(Create DB) 및 저장
             # 벡터스토어를 생성하고, 저장한다.
-            logger.debug(f"Creating and Saving the vectorstore. Channel IDs: {channel_ids}")
+            logger.debug(f"Creating and Saving the vectorstore. Channel IDs: {channel_ids}, scope: {self.scope}")
             self._vectorstore = FAISS.from_documents(documents=split_documents, embedding=self._embedding)
             self._save_vectorstore()
 
             # chatbot collection에서 chatIds를 수집된 채팅의 ID로 업데이트
-            logger.debug(f"Updating chatbot metadata. Channel IDs: {channel_ids}")
+            logger.debug(f"Updating chatbot metadata. Channel IDs: {channel_ids}, scope: {self.scope}")
             self._update_db()
         except Exception as e:
             logger.error(f"An error occurred while building vectorstore: {e}")

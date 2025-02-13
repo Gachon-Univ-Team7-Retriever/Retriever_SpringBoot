@@ -26,6 +26,7 @@ def confirm_request(data, required: list):
 import uuid
 import typing
 def generate_integer_id64(existing_ids:typing.Iterable[int]=None):
+    """64비트 무작위 정수 ID를 생성해서 반환하는 함수."""
     # uuid4()를 사용하여 무작위 UUID 생성 후, 정수형으로 변환
     if not existing_ids:
         return uuid.uuid4().int % (1 << 63)
@@ -38,6 +39,7 @@ def compare_dicts_sorted(
         dict1: dict[str, list[int]],
         dict2: dict[str, list[int]]
 ) -> bool:
+    """두 개의 딕셔너리를 비교해서 원소가 완벽히 동일하면 참을, 그렇지 않으면 거짓을 반환하는 함수."""
     # 두 딕셔너리의 키 집합이 동일한지 확인
     if set(dict1.keys()) != set(dict2.keys()):
         return False
