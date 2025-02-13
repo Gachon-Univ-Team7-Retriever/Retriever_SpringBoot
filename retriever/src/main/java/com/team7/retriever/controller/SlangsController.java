@@ -26,7 +26,7 @@ public class SlangsController {
     }
 
     // 아이디로 조회
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}") /* 250106 수정 */
     public Optional<Slangs> getSlangById(@PathVariable String id) {
         return slangsService.getSlangById(id);
     }
