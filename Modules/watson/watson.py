@@ -3,14 +3,16 @@ import threading
 import typing
 import os
 from dotenv import load_dotenv
+from operator import itemgetter
 
 load_dotenv()
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough, RunnableWithMessageHistory
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
+from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import MongodbLoader
 
@@ -48,22 +50,26 @@ class AutoCreateInstances(type):
 class Watson(metaclass=AutoCreateInstances):
     prompt_template = PromptTemplate.from_template(
         """
-        You are an assistant responding to inquiries from an investigator trying to investigate a drug-selling channel. 
-        Below is chat data collected from a Telegram channel where drugs are being sold.
-        Based on this chat data, answer questions about the transaction details of the channel.
-        If you don't know the answer, just say that you don't know.
-        Answer in Korean.
+    You are an assistant responding to inquiries from an investigator trying to investigate a drug-selling channel. 
+    Below is chat data collected from a Telegram channel where drugs are being sold.
+    Based on this chat data, answer questions about the transaction details of the channel.
+    If you don't know the answer, just say that you don't know.
+    Answer in Korean.
 
-        #Question:
-        {question}
+    #Previous Chat History:
+    {chat_history}
 
-        #Context:
-        {context}
+    #Question:
+    {question}
 
-        #Answer:
-        """
+    #Context:
+    {context}
+
+    #Answer:"""
     )
+
     _instances = {}
+    _session_history = {}  # 세션 기록을 저장할 딕셔너리
     _lock = threading.Lock()
     error_msg_for_empty_data = "죄송합니다. 요청하신 채널의 데이터가 없거나, 아직 수집되지 않아 답변을 드릴 수 없습니다."
     GLOBAL = "global"
@@ -107,7 +113,7 @@ class Watson(metaclass=AutoCreateInstances):
         """생성된 instance 중 참고하는 채널의 목록이 같으면 해당 봇의 ID를 반환하는 메서드."""
         for bot_id, bot_instance in self._instances.items():
             # global 챗봇은 하나만 유지하므로 scope가 global이면 global 챗봇만 찾고, 아닐 경우에만 channel ids를 비교한다.
-            if scope == "global":
+            if scope == self.GLOBAL:
                 if bot_instance.scope == scope:
                     return bot_id
             elif sorted(list(bot_instance.chats.keys())) == sorted(map(str, channel_ids)):
@@ -143,7 +149,7 @@ class Watson(metaclass=AutoCreateInstances):
                         # 채팅 데이터 collection에서, 참고하려는 채널에서 송수신된 모든 채팅의 채팅 id를 채널 id로 나누어서 저장.
                         # 이 때, scope가 "global"이라면 모든 채널 ID를 불러와서 저장.
                         self.chats[str(channel_id)] = [chat.get('id') for chat in chat_collection.find(
-                            {} if self.scope == "global" else {"channelId": channel_id}
+                            {} if self.scope == self.GLOBAL else {"channelId": channel_id}
                         )]
                     logger.debug(f"새로운 챗봇을 생성했습니다. Chatbot ID: {self._bot_id}")
 
@@ -283,7 +289,7 @@ class Watson(metaclass=AutoCreateInstances):
             if self._vectorstore:
                 # 단계 5: 검색기(Retriever) 생성
                 # 문서에 포함되어 있는 정보를 검색하고 생성한다.
-                retriever = self._vectorstore.as_retriever()
+                retriever = self._vectorstore.as_retriever(search_kwargs={"k": 6}) # 6개의 문서 검색
 
                 # 단계 6: 프롬프트 생성(Create Prompt)
                 # 프롬프트를 생성한다.
@@ -294,19 +300,49 @@ class Watson(metaclass=AutoCreateInstances):
                 # llm = ChatOpenAI(model_name="gpt-4o", temperature=0) -> self._llm으로 바로 참조하기 때문에 생략됨.
 
                 # 단계 8: 체인(Chain) 생성
-                self._chain = (
-                        {"context": retriever, "question": RunnablePassthrough()}  # 1. [prompt에 들어갈 값](딕셔너리 형태)
-                        | self.prompt_template  # 2. context와 question이 들어갈 [프롬프트]
-                        | self._llm  # 3. 프롬프트가 들어갈 [LLM]
-                        | StrOutputParser()  # 4. LLM이 내놓은 결과를 정리해줄 [Parser]
+                chain = (
+                    {
+                        "context": itemgetter("question") | retriever,
+                        "question": itemgetter("question"),
+                        "chat_history": itemgetter("chat_history"),
+                    }
+                    # {"context": retriever, "question": RunnablePassthrough()}  # 1. [prompt에 들어갈 값](딕셔너리 형태)
+                    | self.prompt_template  # 2. context와 question이 들어갈 [프롬프트]
+                    | self._llm  # 3. 프롬프트가 들어갈 [LLM]
+                    | StrOutputParser()  # 4. LLM이 내놓은 결과를 정리해줄 [Parser]
                 )  # 배경지식과 질문 -> 프롬프트 -> LLM -> 결과 전처리 Parser 의 4단계 chain이 생성됨.
+
+                # 이전 답변 history를 기억하는 session을
+                self._chain = RunnableWithMessageHistory(
+                    chain,
+                    self.get_session_history,  # 세션 기록을 가져오는 함수
+                    input_messages_key="question",  # 사용자의 질문이 템플릿 변수에 들어갈 key
+                    history_messages_key="chat_history",  # 기록 메시지의 키
+                )
         except Exception as e:
             logger.error(f"An error occurred while building langchain: {e}")
+
+
+    # 세션 ID를 기반으로 세션 기록을 가져오는 함수
+    def get_session_history(self, session_ids):
+        logger.debug(f"Get chat session IDs: {session_ids}")
+        if session_ids not in self._session_history:  # 세션 ID가 store에 없는 경우
+            # 새로운 ChatMessageHistory 객체를 생성하여 store에 저장
+            self._session_history[session_ids] = ChatMessageHistory()
+        return self._session_history[session_ids]  # 해당 세션 ID에 대한 세션 기록 반환
+
 
     # 체인 실행(Run Chain)
     # 문서에 대한 질의를 입력하고, 답변을 출력한다.
     def ask(self, question: str):
-        # chain이 있으면 chain을 실행하고 답변을 반환. chain이 없으면 에러 메세지 반환.
-        answer = self._chain.invoke(question) if self._chain else self.error_msg_for_empty_data
-        logger.info(f"Chatbot answered to a question. Q: '{question}', A: '{answer}'")
-        return answer
+        try:
+            # chain이 있으면 chain을 실행하고 답변을 반환. chain이 없으면 에러 메세지 반환.
+            answer = self._chain.invoke(
+                {"question": question}, # 질문 입력
+                config={"configurable": {"session_id": self._bot_id}} # 세션 ID 기준으로 대화를 기록
+            ) if self._chain else self.error_msg_for_empty_data
+            logger.info(f"Chatbot answered to a question. Q: '{question}', A: '{answer}'")
+            return answer
+        except Exception as e:
+            logger.error(f"An error occurred while asking bot a question: {e}")
+            return None

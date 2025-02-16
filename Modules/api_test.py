@@ -2436,9 +2436,10 @@ test_set = [
         'url': "http://127.0.0.1:5000/watson/c",
         'method': "POST",
         'data': {
+            # "id": 1,
             "channel_ids": [1890652954],
-            "scope": "global",
-            "question": "이 채널에서 마약이 판매되는 지역은 어디지?",
+            "scope": "local",
+            "question": "방금 전에 한 답변을 다시 말해줘",
         }
     },
 ]
