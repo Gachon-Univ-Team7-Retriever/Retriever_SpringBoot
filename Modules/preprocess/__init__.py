@@ -9,7 +9,9 @@ preprocess_bp = Blueprint('preprocess', __name__, url_prefix='/preprocess')
 @preprocess_bp.route("/extract/web-promotion", methods=["POST"])
 def extract_text_block():
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['html']):
+    if response_for_invalid_request := confirm_request(data, {
+        'html': str
+    }):
         return response_for_invalid_request
 
     try:

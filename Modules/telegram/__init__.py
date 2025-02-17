@@ -5,6 +5,7 @@ from utils import confirm_request
 from .Telegrasper.manager import TelegramManager
 
 import threading
+import typing
 
 singleton_ready = threading.Event()  # 이벤트 객체 생성
 telegram_manager = TelegramManager()
@@ -30,7 +31,7 @@ telegram_bp = Blueprint('telegram', __name__, url_prefix='/telegram')
 def connect_channel():
     logger.info("텔레그램 채널 정보 조회 API 호출됨.")
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['channel_key']):
+    if response_for_invalid_request := confirm_request(data, {'channel_key': typing.Union[int, str]}):
         return response_for_invalid_request
     channel_key = data['channel_key']
 
@@ -51,7 +52,7 @@ def disconnect_channel():
 def scrape_channel():
     logger.info("텔레그램 채널 스크랩 API 호출됨.")
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['channel_key']):
+    if response_for_invalid_request := confirm_request(data, {'channel_key': typing.Union[int, str]}):
         return response_for_invalid_request
 
     channel_key = data['channel_key']
@@ -65,7 +66,7 @@ def scrape_channel():
 def check_channel():
     logger.info("텔레그램 채널 검문 API 호출됨.")
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['channel_key']):
+    if response_for_invalid_request := confirm_request(data, {'channel_key': typing.Union[int, str]}):
         return response_for_invalid_request
 
     channel_key = data['channel_key']
@@ -80,7 +81,10 @@ def check_channel():
 def monitor_channel():
     logger.info("텔레그램 채널 모니터링 API 호출됨.")
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['channel_key', 'how']):
+    if response_for_invalid_request := confirm_request(data, {
+        'channel_key': typing.Union[int, str],
+        'how': str
+    }):
         return response_for_invalid_request
 
     try:
