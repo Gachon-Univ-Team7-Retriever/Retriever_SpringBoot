@@ -6,7 +6,10 @@ crawl_bp = Blueprint('crawl', __name__, url_prefix='/crawl')
 @crawl_bp.route('/links', methods=["POST"])
 def crawl_web_links():
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['queries', 'max_results']):
+    if response_for_invalid_request := confirm_request(data, {
+        'queries': list[str],
+        'max_results': int,
+    }):
         return response_for_invalid_request
 
     try:

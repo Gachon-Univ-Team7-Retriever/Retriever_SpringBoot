@@ -2,6 +2,7 @@ from datetime import datetime
 import threading
 import typing
 import os
+import sqlite3
 from dotenv import load_dotenv
 from operator import itemgetter
 
@@ -10,9 +11,9 @@ load_dotenv()
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableWithMessageHistory
+from langchain_core.runnables import RunnablePassthrough, RunnableWithMessageHistory, ConfigurableFieldSpec
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
-from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_community.chat_message_histories import ChatMessageHistory, SQLChatMessageHistory
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import MongodbLoader
 
@@ -20,12 +21,23 @@ from utils import generate_integer_id64, compare_dicts_sorted
 from server.db import DB, get_mongo_collection
 from server.db import get_mongo_connection_string
 from server.logger import logger
-from .vectorstore import __file__
+from .vectorstore import __file__ as vectorstore_path
 
 
 # 모든 챗봇의 메타데이터를 가져와서 초기화.
 chatbot_collection = get_mongo_collection(DB.NAME, DB.COLLECTION.CHATBOT)
 chat_collection = get_mongo_collection(DB.NAME, DB.COLLECTION.CHANNEL.DATA)
+
+config_fields = [
+    ConfigurableFieldSpec(
+        id="conversation_id",
+        annotation=str,
+        name="Conversation ID",
+        description="Unique identifier for a conversation.",
+        default="",
+        is_shared=True,
+    ),
+]
 
 def load_chats(channel_ids:typing.Iterable[typing.Union[str, int]]):
     chats = {}
@@ -49,22 +61,21 @@ class AutoCreateInstances(type):
             
 class Watson(metaclass=AutoCreateInstances):
     prompt_template = PromptTemplate.from_template(
-        """
-    You are an assistant responding to inquiries from an investigator trying to investigate a drug-selling channel. 
-    Below is chat data collected from a Telegram channel where drugs are being sold.
-    Based on this chat data, answer questions about the transaction details of the channel.
+        """You are an assistant responding to inquiries from an investigator trying to investigate a drug-selling channel. 
+    Below is the chat data (context) collected from a Telegram channel where drugs are sold, along with our previous Q&A Chat history. 
+    Based on this context chat data and previous chat history, answer questions from the investigator.
     If you don't know the answer, just say that you don't know.
     Answer in Korean.
-
-    #Previous Chat History:
+    
+    #Context: 
+    {context} 
+    
+    #Our Previous Chat History:
     {chat_history}
-
-    #Question:
-    {question}
-
-    #Context:
-    {context}
-
+    
+    #Question: 
+    {question} 
+    
     #Answer:"""
     )
 
@@ -75,6 +86,8 @@ class Watson(metaclass=AutoCreateInstances):
     GLOBAL = "global"
     MULTI = "multi"
     LOCAL = "local"
+    _sqlalchemy_connection_string = f"sqlite:///{os.path.dirname(os.path.dirname(vectorstore_path))}/chats.db"
+    _sqlite_connection_string = f"{os.path.dirname(os.path.dirname(vectorstore_path))}/chats.db"
 
     def __new__(cls, bot_id:int=None, channel_ids:list=None, scope:str=None):
         """
@@ -160,7 +173,7 @@ class Watson(metaclass=AutoCreateInstances):
 
                 self._vectorstore, self._chain = None, None
                 # watson/vectorstore/<bot id> 위치에 벡터스토어 저장.
-                self._vectorstore_path = os.path.join(os.path.dirname(__file__), str(self._bot_id))
+                self._vectorstore_path = os.path.join(os.path.dirname(vectorstore_path), str(self._bot_id))
                 self._update_vectorstore()
 
         except Exception as e:
@@ -300,6 +313,10 @@ class Watson(metaclass=AutoCreateInstances):
                 # llm = ChatOpenAI(model_name="gpt-4o", temperature=0) -> self._llm으로 바로 참조하기 때문에 생략됨.
 
                 # 단계 8: 체인(Chain) 생성
+                # itemgetter 없이 그냥 {"context": retriever, "question": RunnablePassthrough()}와 같이 사용하면,
+                # retriever의 question 입력으로 문자열이 아닌 {"question": 질문 내용}과 같은 dict가 들어가면서
+                # TypeError: argument 'text': 'dict' object cannot be converted to 'PyString' 라는 오류가 발생한다.
+                # 때문에 question 속성을 가져오는 Runnable을 결합해야 함.
                 chain = (
                     {
                         "context": itemgetter("question") | retriever,
@@ -318,31 +335,46 @@ class Watson(metaclass=AutoCreateInstances):
                     self.get_session_history,  # 세션 기록을 가져오는 함수
                     input_messages_key="question",  # 사용자의 질문이 템플릿 변수에 들어갈 key
                     history_messages_key="chat_history",  # 기록 메시지의 키
+                    history_factory_config=config_fields,  # 대화 기록 조회시 참고할 파라미터를 설정.
                 )
         except Exception as e:
             logger.error(f"An error occurred while building langchain: {e}")
 
 
     # 세션 ID를 기반으로 세션 기록을 가져오는 함수
-    def get_session_history(self, session_ids):
-        logger.debug(f"Get chat session IDs: {session_ids}")
-        if session_ids not in self._session_history:  # 세션 ID가 store에 없는 경우
-            # 새로운 ChatMessageHistory 객체를 생성하여 store에 저장
-            self._session_history[session_ids] = ChatMessageHistory()
-        return self._session_history[session_ids]  # 해당 세션 ID에 대한 세션 기록 반환
+    def get_session_history(self, conversation_id):
+        logger.debug(f"Get chat session IDs: {self._bot_id}")
+        return SQLChatMessageHistory(
+            table_name=self._bot_id,
+            session_id=conversation_id,
+            connection=self._sqlalchemy_connection_string,
+        )
+
+    def clear_message_history(self):
+        """
+        주어진 세션(session_id)에 해당하는 메시지 히스토리를 삭제한다.
+
+        Parameters:
+            connection (sqlite3.Connection): SQLite 데이터베이스 연결 객체
+            table_name (str): 메시지 히스토리가 저장된 테이블 이름
+            conversation_id (str): 삭제할 메시지 히스토리의 세션 ID
+        """
+        query = f"DELETE FROM `{self._bot_id}` WHERE session_id = ?"
+        connection = sqlite3.connect(self._sqlite_connection_string)
+        cursor = connection.cursor()
+        cursor.execute(query, ("conversation1",))
+        connection.commit()
+        cursor.close()
 
 
     # 체인 실행(Run Chain)
     # 문서에 대한 질의를 입력하고, 답변을 출력한다.
     def ask(self, question: str):
-        try:
-            # chain이 있으면 chain을 실행하고 답변을 반환. chain이 없으면 에러 메세지 반환.
-            answer = self._chain.invoke(
-                {"question": question}, # 질문 입력
-                config={"configurable": {"session_id": self._bot_id}} # 세션 ID 기준으로 대화를 기록
-            ) if self._chain else self.error_msg_for_empty_data
-            logger.info(f"Chatbot answered to a question. Q: '{question}', A: '{answer}'")
-            return answer
-        except Exception as e:
-            logger.error(f"An error occurred while asking bot a question: {e}")
-            return None
+        # chain이 있으면 chain을 실행하고 답변을 반환. chain이 없으면 에러 메세지 반환.
+        answer = self._chain.invoke(
+            {"question": question}, # 질문 입력
+            # 세션 ID 기준으로 대화를 기록. 현재는 세션 ID가 고정이라서 bot 하나당 하나의 세션만 유지됨.
+            config={"configurable": {"conversation_id": "conversation1"}}
+        ) if self._chain else self.error_msg_for_empty_data
+        logger.info(f"Chatbot answered to a question. Q: '{question}', A: '{answer}'")
+        return answer

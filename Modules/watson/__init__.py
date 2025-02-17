@@ -1,32 +1,42 @@
+import typing
+
 from flask import Blueprint, request, jsonify
 
 from server.logger import logger
-from telegram.Telegrasper.channel import is_channel_empty
 from .watson import Watson
 from utils import confirm_request
 
 watson_bp = Blueprint('watson', __name__, url_prefix='/watson')
 
 @watson_bp.route('/c', methods=['POST'])
-def ask_watson():
-    logger.info("챗봇 질문 API 호출됨.")
+def chat_with_watson():
     data = request.json
-    if response_for_invalid_request := confirm_request(data, ['question']):
+    if response_for_invalid_request := confirm_request(data, {
+        'action': (str, ["ask", "reset"]),
+        'bot_id': typing.Optional[int],
+        'channel_ids': typing.Optional[list],
+        'scope': (typing.Optional[str], ["global", "local"])
+    }):
         return response_for_invalid_request
-    try:
-        bot_id, channel_ids, scope = data.get('bot_id'), data.get('channel_ids'), data.get('scope')
-        if bot_id and not isinstance(bot_id, int):
-            return jsonify({"error": f"Please provide valid 'bot_id'. Expected type is integer, got {type(bot_id)}"}), 400
-        if channel_ids and not isinstance(channel_ids, list):
-            return jsonify({"error": f"Please provide valid 'channel_ids'. Expected type is list, got {type(channel_ids)}"}), 400
-        if scope and scope not in (available_scopes := ["global", "local"]):
-            return jsonify({"error": f"Please provide valid 'scope'. Valid values: {available_scopes}, got {scope}"}), 400
-    except Exception as e:
-        logger.error(str(e))
-        return jsonify({"error": str(e)}), 500
+    if not data.get('bot_id') and (not data.get('scope') or not data.get('channel_ids')):
+        return {"error": f"Please provide ('bot_id'), or ('channel_ids' and 'scope') in the JSON request body."}
 
-    try:
-        return jsonify({"answer": Watson(bot_id=bot_id, channel_ids=channel_ids, scope=scope).ask(data['question'])}), 200
-    except Exception as e:
-        logger.error(str(e))
-        return jsonify({"error": str(e)}), 500
+    bot = Watson(
+        bot_id=data.get('bot_id'),
+        channel_ids=data.get('channel_ids'),
+        scope=data.get('scope')
+    )
+    if data['action'] == "ask":
+        return ask_watson(bot, data)
+    elif data['action'] == "reset":
+        bot.clear_message_history()
+        return jsonify({"success": True}), 200
+
+
+def ask_watson(bot, data):
+    """챗봇에게 질문을 던지고 결과를 반환하는 함수."""
+    if response_for_invalid_request := confirm_request(data, {
+        'question': str,
+    }):
+        return response_for_invalid_request
+    return jsonify({"answer": bot.ask(data['question'])}), 200
