@@ -1,14 +1,16 @@
 from flask import Blueprint, request, jsonify
+from utils import confirm_request
 from . import crawler
 
 crawl_bp = Blueprint('crawl', __name__, url_prefix='/crawl')
 @crawl_bp.route('/links', methods=["POST"])
 def crawl_web_links():
     data = request.json
-    if not data or 'queries' not in data:
-        return jsonify({"error": "Please provide 'queries' in the request arguments."}), 400
-    if not data or 'max_results' not in data:
-        return jsonify({"error": "Please provide 'max_results' in the request arguments."}), 400
+    if response_for_invalid_request := confirm_request(data, {
+        'queries': list[str],
+        'max_results': int,
+    }):
+        return response_for_invalid_request
 
     try:
         result = crawler.search_links(data['queries'], data['max_results'])

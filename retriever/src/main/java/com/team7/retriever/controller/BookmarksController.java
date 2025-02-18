@@ -23,7 +23,7 @@ public class BookmarksController {
     }
 
     // 모든 북마크 조회
-    @GetMapping
+    @GetMapping("/all") /* 241231 수정 */
     public ResponseEntity<List<Bookmarks>> getAllBookmarks() {
         List<Bookmarks> bookmarks = BookmarksService.getAllBookmarks();
         return ResponseEntity.ok(bookmarks);
@@ -36,8 +36,8 @@ public class BookmarksController {
         return ResponseEntity.ok(bookmarks);
     }
 
-    // 특정 ID로 북마크 조회
-    @GetMapping("/{id}")
+    // 특정 북마크 ID로 북마크 조회
+    @GetMapping("/id/{id}") /* 241231 수정 */
     public ResponseEntity<Bookmarks> getBookmarkById(@PathVariable String id) {
         Optional<Bookmarks> bookmark = BookmarksService.getBookmarksById(id);
         return bookmark.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
