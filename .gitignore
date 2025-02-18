@@ -1,3 +1,24 @@
+# IDE의 관리 파일 무시
 .idea
+
+# __pycache__ 폴더 및 모든 .pyc 파일 무시
+__pycache__/
+*.pyc
+
+# 시스템 환경 변수 파일 무시
+.env
+
+# 서버 로그 파일 무시
 *.log
+
+# Flask API 서버의 테스트 코드 무시
 test.py
+
+# vectorstore 내의 faiss 데이터베이스 파일을 무시
+vectorstore/**
+# vectorstore 디렉토리 자체는 무시하지 않음 (하위 패턴들을 적용하기 위해)
+!vectorstore/
+# vectorstore 디렉토리 바로 아래의 .py 파일은 추적
+!vectorstore/*.py
+# vectorstore 디렉토리 내의 모든 하위 폴더에서 .py 파일은 추적
+!vectorstoreA/**/*.py

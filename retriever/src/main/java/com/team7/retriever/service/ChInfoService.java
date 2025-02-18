@@ -42,4 +42,10 @@ public class ChInfoService {
     public Optional<ChInfo> getChannelByLink(String link) {
         return chInfoRepository.findByLink(link);
     }
+
+    /* 250102 추가 */
+    // 채널 이름에 포함
+    public List<ChInfo> getChannelInfoByNameContaining(String name) {
+        return chInfoRepository.findByNameContaining(name);
+    }
 }

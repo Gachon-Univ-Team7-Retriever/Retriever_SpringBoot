@@ -5,12 +5,17 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostsRepository extends MongoRepository<Posts, String> {
 
     // 전체 게시글 조회
     List<Posts> findAll();
+
+    /* 241231 추가 */
+    // Id로 조회
+    Optional<Posts> findById(String id);
 
     // 태그로 조회
     List<Posts> findByTag(String tag);
