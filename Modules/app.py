@@ -1,11 +1,8 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 
 import os
 import sys
 from dotenv import load_dotenv
-
-# .env 파일 로드
-load_dotenv()
 
 # 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +19,11 @@ current_working_directory = os.getcwd()
 if os.path.normpath(current_working_directory) != os.path.normpath(current_dir):
     raise Exception(f"현재 작업 디렉토리({current_working_directory})가 기대하는 디렉토리({current_dir})가 아닙니다.")
 
+# .env 파일 로드
+load_dotenv()
+
 from server.logger import logger
+
 app = Flask(__name__)
 # 모든 Blueprint 등록
 from crawl import crawl_bp
