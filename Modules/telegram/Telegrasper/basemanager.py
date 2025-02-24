@@ -72,7 +72,7 @@ class TelegramBaseManager:
                 asyncio.set_event_loop(background_loop)  # 새 루프를 설정
 
                 self.loop = background_loop
-                self.client = background_loop.run_until_complete(self.start_client())
+                background_loop.run_until_complete(self.start_client())
                 self.my_user_id = background_loop.run_until_complete(self.get_me())
             else:
                 # 만약 현재 실행 흐름이 백그라운드 스레드가 아닐 경우(메인 스레드일 경우), 기존 값이 있으면 그대로 두고 없으면 None으로 초기화한다.
@@ -82,7 +82,7 @@ class TelegramBaseManager:
 
             super().__init__()
 
-    async def start_client(self):
+    async def start_client(self) -> None:
         """ 텔레그램 클라이언트를 초기화하고 시작, 초기화된 클라이언트를 반환하는 메서드 """
         if threading.current_thread() is threading.main_thread():
             error_message = "Telegram Singleton을 메인 스레드에서 실행하고 있습니다. Flask 서버가 제대로 실행되지 않을 수 있습니다."
@@ -98,9 +98,12 @@ class TelegramBaseManager:
             raise TypeError(error_message)
 
         self.client = TelegramClient(ds.number, ds.apiID, ds.apiHash, loop=self.loop)
+        # loop를 미리 지정해 두고, 그 loop에서 run_until_complete로 실행한 start()이다.
+        # TelegramClient의 start()는 클라이언트의 loop가 이미 실행 중이면 직접 await해야 하는 coroutine 객체를 반환하기 때문에,
+        # 여기서 await을 해 주어야 한다.
         await self.client.start()
+
         logger.info("Telegram Client started.")
-        return self.client
 
     async def get_me(self):
         """ 현재 클라이언트에서 사용자 정보를 가져오는 메서드 """
