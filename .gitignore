@@ -22,3 +22,6 @@ vectorstore/**
 !vectorstore/*.py
 # vectorstore 디렉토리 내의 모든 하위 폴더에서 .py 파일은 추적
 !vectorstoreA/**/*.py
+
+# Telegram API session 파일 무시
+.session
