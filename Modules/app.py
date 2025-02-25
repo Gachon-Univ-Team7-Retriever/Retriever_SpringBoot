@@ -23,8 +23,10 @@ if os.path.normpath(current_working_directory) != os.path.normpath(current_dir):
 load_dotenv()
 
 from server.logger import logger
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 # 모든 Blueprint 등록
 from crawl import crawl_bp
 app.register_blueprint(crawl_bp)
