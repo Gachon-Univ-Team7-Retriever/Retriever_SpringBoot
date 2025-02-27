@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from . import post, post_similarity
-from .channel import calculate_similarity
 from .post import dbscan_clustering, collection, db
 
 # Blueprint 설정
@@ -23,7 +22,7 @@ def post_clustering():
 
 # '/get_clustered_results' 엔드포인트
 @cluster_bp.route('/post_similarity', methods=['POST'])
-def post_similarity():
+def post_similarity_calculation():
     try:
         result = post_similarity.calculate_and_store_similarity()
         return jsonify(result), 200
