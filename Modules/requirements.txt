@@ -9,6 +9,7 @@ selenium
 
 # Flask 서버 작동에 필요한 패키지
 Flask
+flask-cors
 google-cloud-storage
 
 # MongoDB 데이터베이스 운용에 필요한 패키지
