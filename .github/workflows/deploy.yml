@@ -20,6 +20,7 @@ jobs:
           ssh-keyscan -H ${{ secrets.GCP_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to GCP
+        run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} << 'EOF'
             cd /home/softchocopie/Retriever_backend
             git pull origin develop
