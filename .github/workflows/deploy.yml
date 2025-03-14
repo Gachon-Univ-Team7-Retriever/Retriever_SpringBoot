@@ -15,19 +15,19 @@ jobs:
       - name: Set up SSH key and ssh-agent
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github_deploy_key
+          chmod 600 ~/.ssh/github_deploy_key
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/deploy_key
+          ssh-add ~/.ssh/github_deploy_key
           ssh-keyscan -H ${{ secrets.GCP_HOST }} >> ~/.ssh/known_hosts
 
       - name: Test SSH Connection
         run: |
-          ssh -vvv -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "echo 'SSH Connection Successful'"
+          ssh -vvv -o StrictHostKeyChecking=no -i ~/.ssh/github_deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "echo 'SSH Connection Successful'"
 
       - name: Deploy to GCP
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/github_deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} << 'EOF'
             cd /home/softchocopie/Retriever_backend
             git pull origin develop
             screen -S api_server -X quit || true  # 기존 세션 종료 (없으면 무시)
