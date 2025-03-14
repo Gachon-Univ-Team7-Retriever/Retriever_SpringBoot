@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 
 from utils import confirm_request
 from .watson import Watson
+from server.logger import logger
 
 watson_bp = Blueprint('watson', __name__, url_prefix='/watson')
 
@@ -32,8 +33,12 @@ def chat_with_watson():
 
 def ask_watson(bot, data):
     """챗봇에게 질문을 던지고 결과를 반환하는 함수."""
-    if response_for_invalid_request := confirm_request(data, {
-        'question': str,
-    }):
-        return response_for_invalid_request
-    return jsonify({"answer": bot.ask(data['question'])}), 200
+    try:
+        if response_for_invalid_request := confirm_request(data, {
+            'question': str,
+        }):
+            return response_for_invalid_request
+        return jsonify({"answer": bot.ask(data['question'])}), 200
+    except Exception as e:
+        logger.error(e)
+        return jsonify({"answer": f"죄송합니다. 에러가 발생했습니다. 시스템, 또는 AI를 제공하는 외부 API의 문제일 수 있습니다."}), 500

@@ -328,7 +328,7 @@ class LangGraphMethods:
         return update_state(state, node_name="validate_retrieved_context", context=retrieved_docs)
 
     @staticmethod
-    def evaluate_retrieved_context(state:GraphState) -> Literal["generate", "rewrite"]:
+    def evaluate_retrieved_context(state:GraphState) -> Literal["generate", "rewrite_question"]:
         if state.get("debug"):
             print("\n=== BRANCH: evaluate retrieved context ===\n")
 
@@ -374,7 +374,7 @@ class LangGraphMethods:
         else:
             if state.get("debug"):
                 print("==== [DECISION: DOCS NOT RELEVANT] ====")
-            return "rewrite"
+            return "rewrite_question"
 
     @staticmethod
     def rewrite_question(state:GraphState) -> GraphState:
@@ -454,7 +454,7 @@ class LangGraphMethods:
         # memory를 설정하면 state["messages"]에 계속해서 대화 기록이 저장되기 때문에,
         # 이를 AI가 받아서 이전 채팅 기록에 근거한 답변을 생성할 수 있게 된다.
         prompt = ChatPromptTemplate.from_messages([
-            *state["messages"],
+            *(state["messages"]),
             ("system", indication),
             ("human", "{question}"),
         ])
