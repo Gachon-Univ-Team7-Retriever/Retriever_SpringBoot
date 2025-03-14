@@ -20,5 +20,9 @@ jobs:
           ssh-keyscan -H ${{ secrets.GCP_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to GCP
-        run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} "cd /path/to/project && git pull origin develop && npm install && pm2 restart all"
+          ssh -i ~/.ssh/deploy_key ${{ secrets.GCP_USER }}@${{ secrets.GCP_HOST }} << 'EOF'
+            cd /home/softchocopie/Retriever_backend
+            git pull origin develop
+            screen -S api_server -X quit || true  # 기존 세션 종료 (없으면 무시)
+            screen -dmS api_server bash -c "cd /home/softchocopie/Retriever_backend/Modules && source ../.venv/bin/activate && python3 app.py"
+          EOF

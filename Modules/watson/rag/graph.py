@@ -454,7 +454,7 @@ class LangGraphMethods:
         # memory를 설정하면 state["messages"]에 계속해서 대화 기록이 저장되기 때문에,
         # 이를 AI가 받아서 이전 채팅 기록에 근거한 답변을 생성할 수 있게 된다.
         prompt = ChatPromptTemplate.from_messages([
-            *state["messages"],
+            *(state["messages"]),
             ("system", indication),
             ("human", "{question}"),
         ])
