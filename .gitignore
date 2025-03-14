@@ -13,6 +13,7 @@ __pycache__/
 
 # Flask API 서버의 테스트 코드 무시
 test.py
+api_test.ipynb
 
 # vectorstore 내의 faiss 데이터베이스 파일을 무시
 vectorstore/**
