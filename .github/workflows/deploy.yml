@@ -9,6 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug GCP_HOST value
+        run: echo "GCP_HOST is ${{ secrets.GCP_HOST }}"
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
