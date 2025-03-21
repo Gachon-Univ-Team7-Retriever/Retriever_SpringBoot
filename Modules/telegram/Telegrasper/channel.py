@@ -11,7 +11,9 @@ if typing.TYPE_CHECKING:
     from .manager import TelegramManager
 
 class ChannelMethods(ChannelContentMethods, ChannelContentMonitorMethods):
-    def get_channel_info(self:'TelegramManager', channel_key:typing.Union[int, str]) -> dict:
+    def get_channel_info(self:'TelegramManager',
+                         channel_key:typing.Union[int, str],
+                         status: typing.Literal["active", "inactive"]) -> dict:
         # MongoDB client 생성
         collection_name = DB.COLLECTION.CHANNEL.INFO
         collection = get_mongo_collection(DB.NAME, collection_name)  # 컬렉션 선택
@@ -25,6 +27,7 @@ class ChannelMethods(ChannelContentMethods, ChannelContentMonitorMethods):
             "startedAt": entity.date, # 채널이 생성된 일시 (datetime.datetime)
             "discoveredAt": datetime.datetime.now(), # 채널이 처음으로 발견된 일시
             "updatedAt": datetime.datetime.now(), # 채널의 업데이트를 마지막으로 확인한 일시
+            "status": status,
         }
         try:
             collection.insert_one(channel_info.copy())  # 데이터 삽입. copy()를 하지 않으면 mongoClient가 channel_info 원본 딕셔너리에 ObjectId를 삽입함.

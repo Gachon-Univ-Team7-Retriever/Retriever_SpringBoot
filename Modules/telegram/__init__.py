@@ -31,12 +31,15 @@ telegram_bp = Blueprint('telegram', __name__, url_prefix='/telegram')
 def connect_channel():
     logger.info("텔레그램 채널 정보 조회 API 호출됨.")
     data = request.json
-    if response_for_invalid_request := confirm_request(data, {'channel_key': typing.Union[int, str]}):
+    if response_for_invalid_request := confirm_request(data,
+                                                       {
+                                                           'channel_key': typing.Union[int, str],
+                                                       'status': typing.Literal["active", "inactive"],
+                                                       }):
         return response_for_invalid_request
-    channel_key = data['channel_key']
 
     try:
-        return jsonify(telegram_manager.get_channel_info(channel_key)), 200
+        return jsonify(telegram_manager.get_channel_info(data['channel_key'], data['status'])), 200
     except Exception as e:
         logger.error(str(e))
         return jsonify({"error": str(e)}), 500
