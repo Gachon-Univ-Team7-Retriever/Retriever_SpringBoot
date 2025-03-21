@@ -36,6 +36,8 @@ from telegram import telegram_bp
 app.register_blueprint(telegram_bp)
 from watson import watson_bp
 app.register_blueprint(watson_bp)
+from clustering import cluster_bp
+app.register_blueprint(cluster_bp)
 
 logger.debug("Currently registered routes:")
 for rule in app.url_map.iter_rules():
