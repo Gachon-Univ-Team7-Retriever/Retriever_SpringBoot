@@ -31,4 +31,7 @@ jobs:
             git pull origin develop
             screen -S api_server -X quit || true  # 기존 세션 종료 (없으면 무시)
             screen -dmS api_server bash -c "cd /home/softchocopie/Retriever_backend/Modules && source ../.venv/bin/activate && python3 app.py"
+          
+            echo "현재 실행 중인 screen 세션:"
+            screen -ls
           EOF
