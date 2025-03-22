@@ -34,7 +34,7 @@ def connect_channel():
     if response_for_invalid_request := confirm_request(data,
                                                        {
                                                            'channel_key': typing.Union[int, str],
-                                                       'status': typing.Literal["active", "inactive"],
+                                                           'status': (str, ["active", "inactive"]),
                                                        }):
         return response_for_invalid_request
 
