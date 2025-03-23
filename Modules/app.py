@@ -1,59 +1,48 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 
-import preprocessor.extractor
-import Telerecon.channelscraper
-import crawler
+import os
+import sys
+from dotenv import load_dotenv
+
+# 현재 app.py 파일의 디렉토리 경로를 sys.path에 추가
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
+# 현재 app.py 파일의 디렉토리의 부모 디렉토리 경로를 sys.path에 추가
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+# 현재 작업 디렉토리 (실행 시, 커맨드라인에서 지정된 디렉토리)
+current_working_directory = os.getcwd()
+# 경로 비교 시 경로 형식을 통일하기 위해 normpath()를 사용
+if os.path.normpath(current_working_directory) != os.path.normpath(current_dir):
+    raise Exception(f"현재 작업 디렉토리({current_working_directory})가 기대하는 디렉토리({current_dir})가 아닙니다.")
+
+# .env 파일 로드
+load_dotenv()
+
+from server.logger import logger
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+# 모든 Blueprint 등록
+from crawl import crawl_bp
+app.register_blueprint(crawl_bp)
+from preprocess import preprocess_bp
+app.register_blueprint(preprocess_bp)
+from telegram import telegram_bp
+app.register_blueprint(telegram_bp)
+from watson import watson_bp
+app.register_blueprint(watson_bp)
+from clustering import cluster_bp
+app.register_blueprint(cluster_bp)
 
-# 수집한 웹 홍보글 HTML에서 홍보글의 내용 부분을 추출하는 코드
-@app.route("/preprocess/extract/web_promotion", methods=["POST"])
-def extract_text_block():
-    try:
-        # 요청에서 HTML 텍스트 가져오기
-        html = request.get_json().get("html", "")
-
-        if not html:
-            return jsonify({"error": "No HTML content provided"}), 400
-
-        # HTML에서 텍스트 블록 추출
-        promotion_content = preprocessor.extractor.extract_promotion_content(html)
-
-        return jsonify({
-            "promotion_content": promotion_content
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/telegram/channel/scrape', methods=['POST'])
-def scrape():
-    data = request.json
-    if not data or 'channel_name' not in data:
-        return jsonify({"error": "Please provide 'channel_name' in the JSON request body."}), 400
-
-    channel_name = data['channel_name']
-
-    try:
-        content = Telerecon.channelscraper.main(channel_name)
-        return jsonify(content), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/crawl/google', methods=["GET"])
-def crawl():
-    data = request.args
-    if not data or 'query' not in data:
-        return jsonify({"error": "Please provide 'query' in the request arguments."}), 400
-
-    try:
-        result = crawler.main(data['query'])
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
+logger.debug("Currently registered routes:")
+for rule in app.url_map.iter_rules():
+    logger.debug(f"Route: {rule}, Methods: {rule.methods}, Endpoint: {rule.endpoint}")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    logger.info("Flask server has started!")
+    app.run(host="0.0.0.0", port=5000)

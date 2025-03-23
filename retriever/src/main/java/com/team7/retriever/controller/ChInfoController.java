@@ -36,7 +36,7 @@ public class ChInfoController {
     // ?? null 값 처리 안 했더니 오류 발생
 
     // 특정 아이디로 채널 정보 조회
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}") /* 241231 수정 */
     public Optional<ChInfo> getChannelInfoById(@PathVariable String id) {
         return infoService.getChannelInfoById(id);
     }
@@ -47,6 +47,13 @@ public class ChInfoController {
         return infoService.getChannelByLink(link);
     }
 
-    // + 채널 이름 조회 추가 (포함 조건으로)
+    /* 250102 추가 */
+    // 채널 이름에 포함되는 것
+    @GetMapping("/name/{name}")
+    public List<ChInfo> getChannelByNameContaining(@PathVariable String name) {
+        return infoService.getChannelInfoByNameContaining(name);
+    }
+
+    // + 채널 이름 조회 추가 (포함 조건으로) ---> 완료
     // + 아이디 자동 조합 기능 필요
 }
