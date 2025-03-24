@@ -42,12 +42,16 @@ public class ChannelCheckService {
         // => 모듈 저장값이 다가 아니라서,
         // 모듈에서 먼저 저장하고 가져오든지, (아이디 문제 때문에)
         // 모듈에서 전체 데이터 저장해주든지 하는 방식으로 수정해야 할 것 같음
+
         chInfo = new ChInfo();
+        /*
         chInfo.setId(channel);
         chInfo.setName(channel);
         chInfo.setLink("t.me/"+channel);
         chInfo.setCreatedAt(now);
         chInfo.setUpdatedAt(now);
+
+         */
 
         if (suspicious != null) {
             if (suspicious.equals("true")) {

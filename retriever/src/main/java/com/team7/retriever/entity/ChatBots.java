@@ -13,7 +13,7 @@ import java.util.List;
 public class ChatBots {
     @Id
     private String id;
-    private int channelId;
+    private long channelId;
     private LocalDateTime updatedAt;
     private List<Integer> chatIds = new ArrayList<>();
 }

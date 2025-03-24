@@ -23,8 +23,8 @@ public class ChDataService {
     }
 
     // 유저 아이디로 조회
-    public List<ChData> getChannelDataBySenderId(String senderId) {
-        return chDataRepository.findBySender_senderId(senderId);
+    public List<ChData> getChannelDataBySenderId(String id) {
+        return chDataRepository.findBySender_Id(id);
     }
 
     // 유저 이름으로 조회

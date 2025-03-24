@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,21 +16,24 @@ public class ChData {
 
     // _id 자동 생성
     @Id
-    private String id;
-    private int channelId;
+    @Field("_id")
+    private String _id;
+    private long channelId;
     private LocalDateTime timestamp;
     private String text;
     private senderInfo sender;
     private int views;
     private String url;
-    private int index;
+    @Field("id")
+    private int id;
     private media media;
 
     @Getter
     public static class senderInfo {
         private String type;
         private String name;
-        private String senderId;
+        @Field("id")
+        private String id;
     }
 
     @Getter
