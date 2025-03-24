@@ -17,7 +17,7 @@ public interface ChDataRepository extends MongoRepository<ChData, String> {
     List<ChData> findBySender_Name(String name);
     
     // 채널 아이디로 조회
-    List<ChData> findByChannelId(int channelId);
+    List<ChData> findByChannelId(long channelId);
     
     // 메시지 url로 조회
     List<ChData> findByUrl(String url);

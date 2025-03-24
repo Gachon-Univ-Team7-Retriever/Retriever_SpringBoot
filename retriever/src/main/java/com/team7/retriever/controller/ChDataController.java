@@ -21,7 +21,7 @@ public class ChDataController {
 
     // 채널 아이디로 채팅 조회
     @GetMapping("/channel/{channelID}")
-    public List<ChData> getChannelDataByChannelId(@PathVariable int channelID) {
+    public List<ChData> getChannelDataByChannelId(@PathVariable long channelID) {
         return dataService.getChannelDataByChannelId(channelID);
     }
 
