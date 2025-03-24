@@ -33,7 +33,7 @@ public class ChDataService {
     }
 
     // 채널 아이디로 조회
-    public List<ChData> getChannelDataByChannelId(int channelId) {
+    public List<ChData> getChannelDataByChannelId(long channelId) {
         return chDataRepository.findByChannelId(channelId);
     }
 
