@@ -33,7 +33,7 @@ public class ChData {
         private String type;
         private String name;
         @Field("id")
-        private String id;
+        private long id;
     }
 
     @Getter
