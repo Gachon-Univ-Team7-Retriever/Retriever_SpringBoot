@@ -20,7 +20,7 @@ class ChannelMethods(ChannelContentMethods, ChannelContentMonitorMethods):
         entity = asyncio.run_coroutine_threadsafe(self.connect_channel(channel_key), self.loop).result()
 
         channel_info = {
-            "id": entity.id,
+            "_id": entity.id,
             "title": entity.title,
             "username": entity.username,
             "restricted": entity.restricted, # 채널에 제한이 있는지 여부 (boolean)
