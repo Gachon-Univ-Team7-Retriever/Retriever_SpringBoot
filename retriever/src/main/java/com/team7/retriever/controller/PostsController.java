@@ -1,14 +1,13 @@
 package com.team7.retriever.controller;
 
+import com.team7.retriever.dto.PostLinkRequest;
 import com.team7.retriever.entity.Posts;
 import com.team7.retriever.service.PostsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts")
@@ -22,6 +21,19 @@ public class PostsController {
     public List<Posts> getAllPosts() {
         return PostsService.getAllPosts();
     }
+    
+    /* 241231 추가 */
+    // Id로 조회
+    @GetMapping("/id/{id}") 
+    public Optional<Posts> getPostById(@PathVariable String id) { return PostsService.getPostById(id); }
+
+    /*
+    // 특정 게시글 ID로 조회
+    @GetMapping("/{id}")
+    public Posts getPostById(@PathVariable String id) {
+        return PostsService.getPostById(id);
+    }
+     */
 
     // 태그로 조회
     @GetMapping("/tag/{tag}")
@@ -64,5 +76,11 @@ public class PostsController {
     @GetMapping("/author/{author}")
     public List<Posts> getPostsByAuthor(@PathVariable String author) {
         return PostsService.getPostsByAuthor(author);
+    }
+
+    // 해당 링크로 조회 -> 모든 버전 조회 (수집 시점 순)
+    @PostMapping("/link")
+    public List<Posts> getPostsByLink(@RequestBody PostLinkRequest linkRequest) {
+        return PostsService.getPostsByLink(linkRequest.getLink());
     }
 }

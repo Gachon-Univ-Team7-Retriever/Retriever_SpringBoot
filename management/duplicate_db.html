@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Database Copier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            max-width: 600px;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+        }
+        #status {
+            margin-top: 20px;
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>MongoDB Database Copier</h1>
+    <label for="host">Host:</label>
+    <input type="text" id="host" value="localhost" readonly>
+
+    <label for="port">Port:</label>
+    <input type="text" id="port" value="27017" readonly>
+
+    <label for="sourceDb">Source Database:</label>
+    <input type="text" id="sourceDb" placeholder="e.g., retriever" value="retriever">
+
+    <label for="targetDb">Target Database:</label>
+    <input type="text" id="targetDb" placeholder="e.g., retriever-jisung?">
+
+    <button onclick="copyDatabase()">Copy Database</button>
+
+    <div id="status"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
