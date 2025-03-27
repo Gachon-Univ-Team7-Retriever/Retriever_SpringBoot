@@ -27,7 +27,7 @@ public class ChDataController {
 
     // 유저 아이디로 채팅 조회
     @GetMapping("/user/id/{senderID}") // 신규
-    public List<ChData> getChannelDataBySenderId(@PathVariable String senderID) {
+    public List<ChData> getChannelDataBySenderId(@PathVariable long senderID) {
         return dataService.getChannelDataBySenderId(senderID);
     }
 

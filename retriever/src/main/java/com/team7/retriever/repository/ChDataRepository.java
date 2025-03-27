@@ -11,7 +11,7 @@ import java.util.List;
 public interface ChDataRepository extends MongoRepository<ChData, String> {
     
     // 유저 아이디로 조회
-    List<ChData> findBySender_Id(String id);
+    List<ChData> findBySender_Id(long sender_id);
 
     // 유저 이름으로 조회
     List<ChData> findBySender_Name(String name);
