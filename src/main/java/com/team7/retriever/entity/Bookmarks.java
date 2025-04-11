@@ -1,10 +1,15 @@
 package com.team7.retriever.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Document(collection = "bookmarks")
 public class Bookmarks {
 
@@ -13,39 +18,6 @@ public class Bookmarks {
     private String channelId;
     private String userId;
     private LocalDateTime createdAt;
-
-    // Getters & Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 
     @Override
     public String toString() {
@@ -61,4 +33,5 @@ public class Bookmarks {
         this.createdAt = LocalDateTime.now();  // 현재 시간으로 설정
         this.id = "bm_"+userId+"_"+channelId;
     }
+
 }

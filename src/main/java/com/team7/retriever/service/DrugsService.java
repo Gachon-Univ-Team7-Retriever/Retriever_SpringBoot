@@ -30,16 +30,20 @@ public class DrugsService {
         return drugsRepository.findByDrugType(drugType);
     }
 
-    // 상태로 조회
-    public List<Drugs> getDrugsByStatus(String status) {
-        return drugsRepository.findByStatus(status);
-    }
-
     // 전체 조회
     public List<Drugs> getAllDrugs() {
         return drugsRepository.findAll();
     }
 
+    /*
+    // 상태로 조회
+    public List<Drugs> getDrugsByStatus(String status) {
+        return drugsRepository.findByStatus(status);
+    }
+
+     */
+
+    /*
     // count 큰 순으로 정렬해서 전체 조회
     public List<Drugs> getDrugsSortedByCount() {
         return drugsRepository.findAllByOrderByCountDesc();
@@ -54,4 +58,6 @@ public class DrugsService {
     public List<Drugs> getDrugsByStatusSortedByCount(String status) {
         return drugsRepository.findByStatusOrderByCountDesc(status);
     }
+
+     */
 }

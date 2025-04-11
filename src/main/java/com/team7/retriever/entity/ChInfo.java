@@ -32,5 +32,4 @@ public class ChInfo {
     private int promoCount; // 일단 보류
     private String status;
 
-    // public ChInfo() {}
 }

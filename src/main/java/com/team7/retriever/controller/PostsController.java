@@ -66,10 +66,19 @@ public class PostsController {
         return PostsService.getPostsByPromoSiteLink(promoSiteLink);
     }
 
+    /*
     // 프로모션 이름으로 조회
     @GetMapping("/promoName/{promoSiteName}")
     public List<Posts> getPostsByPromoSiteName(@PathVariable String promoSiteName) {
         return PostsService.getPostsByPromoSiteName(promoSiteName);
+    }
+
+     */
+
+    // 홍보하는 채널 아이디로 조회
+    @GetMapping("/promoChannelId/{promoChannelId}")
+    public List<Posts> getPostsByPromoChannelId(@PathVariable String promoChannelId) {
+        return PostsService.getPostsByPromoChannelId(promoChannelId);
     }
 
     // 게시글 작성자 이름으로 조회

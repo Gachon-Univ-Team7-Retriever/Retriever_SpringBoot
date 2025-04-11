@@ -1,5 +1,6 @@
 package com.team7.retriever.controller;
 
+import com.team7.retriever.dto.ChatArgotDrugDTO;
 import com.team7.retriever.entity.ChData;
 import com.team7.retriever.service.ChDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import java.util.List;
 public class ChDataController {
     @Autowired
     private ChDataService dataService;
+    @Autowired
+    private ChDataService chDataService;
 
     // 전체 채팅 조회
     @GetMapping("/all")
@@ -45,5 +48,10 @@ public class ChDataController {
     @GetMapping("/text") // 신규
     public List<ChData> getChannelDataByText(@RequestParam String text) {
         return dataService.getChannelDataByText(text);
+    }
+
+    @GetMapping("/data")
+    public List<ChatArgotDrugDTO> getArgotDrugsData() {
+        return chDataService.getArgotDrugsData();
     }
 }

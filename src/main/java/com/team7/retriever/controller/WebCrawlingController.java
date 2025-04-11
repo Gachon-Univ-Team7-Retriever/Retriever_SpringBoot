@@ -1,15 +1,13 @@
 package com.team7.retriever.controller;
 
-import com.team7.retriever.dto.WebCrawlingRequest;
 import com.team7.retriever.dto.WebCrawlingResponse;
-import com.team7.retriever.service.SlangsService;
+import com.team7.retriever.service.ArgotsService;
 import com.team7.retriever.service.UpdateCheckService;
 import com.team7.retriever.service.WebCrawlingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/webcrawl")
@@ -17,7 +15,7 @@ public class WebCrawlingController {
     @Autowired
     private WebCrawlingService webCrawlingService;
     @Autowired
-    private SlangsService slangsService;
+    private ArgotsService slangsService;
     @Autowired
     private UpdateCheckService updateCheckService;
 
@@ -39,7 +37,7 @@ public class WebCrawlingController {
     // DB에서 데이터 조회 결과 테스트
     @GetMapping("/slangs")
     public List<String> getSlangs() {
-        return slangsService.getAllSlangsToList();
+        return slangsService.getAllArgotsToList();
     }
 
     // DB 데이터 업데이트 사항 확인

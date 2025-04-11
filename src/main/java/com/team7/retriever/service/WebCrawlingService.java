@@ -25,9 +25,10 @@ public class WebCrawlingService {
     private final ChannelCheckService channelCheckService;
     private final PostHtmlService postHtmlService;
     private final ChInfoService chInfoService;
-    private final SlangsService slangsService;
+    private final ArgotsService slangsService;
+    private final PostSimilarityService postSimilarityService;
 
-    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, SlangsService slangsService) {
+    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService slangsService, PostSimilarityService postSimilarityService) {
         this.restTemplate = restTemplate;
         this.htmlCrawlingService = htmlCrawlingService;
         this.preprocessService = preprocessService;
@@ -35,17 +36,18 @@ public class WebCrawlingService {
         this.postHtmlService = postHtmlService;
         this.chInfoService = chInfoService;
         this.slangsService = slangsService;
+        this.postSimilarityService = postSimilarityService;
     }
 
     // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
     // initialDelay = 5000 -> 초기 5초 지연 시간 설정 -> 스케줄 안에 같이 넣는 것 (참고 용으로 기록)
     // @Scheduled(fixedDelay = 120000) // 테스트 용 - 한 사이클 종료 후 2분 지연 실행
     @Scheduled(cron = "0 0 5 * * *") // 매일 오전 5시마다 실행
-    public WebCrawlingResponse webCrawling() {
+    public void webCrawling() {
         String api = "http://127.0.0.1:5000/crawl/links";
 
         WebCrawlingRequest webCrawlingRequest = new WebCrawlingRequest();
-        webCrawlingRequest.setQueries(slangsService.getAllSlangsToList()); // 테스트 필요
+        webCrawlingRequest.setQueries(slangsService.getAllArgotsToList()); // 테스트 필요
         webCrawlingRequest.setMax(5);
 
         HttpEntity<WebCrawlingRequest> request = new HttpEntity<>(webCrawlingRequest);
@@ -109,8 +111,8 @@ public class WebCrawlingService {
             System.out.println("[WebCrawlingService] 모든 결과에 대한 처리 완료 -------------------------------");
         }
 
-
-        return response.getBody();
+        postSimilarityService.calculateSimilarity();
+        // return response.getBody();
     }
 
     /*

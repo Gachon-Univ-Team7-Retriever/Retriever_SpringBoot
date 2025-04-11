@@ -48,11 +48,11 @@ public class ChScrapeService {
 
     // 스케줄 1 에서 실행되는 메서드
     public void channelScrape(String channelKey) {
-        String infoAPI = "http://127.0.0.1:5000/telegram/channel/info";
+        // String infoAPI = "http://127.0.0.1:5000/telegram/channel/info";
         String api = "http://127.0.0.1:5000/telegram/channel/scrape";
 
         Map<String, String> requestBody = Map.of("channel_key", channelKey);
-        ResponseEntity<String> infoResponse = restTemplate.postForEntity(infoAPI, requestBody, String.class); // 사용X
+        // ResponseEntity<String> infoResponse = restTemplate.postForEntity(infoAPI, requestBody, String.class); // 사용X
         ChDataResponse response = restTemplate.postForObject(api, requestBody, ChDataResponse.class);
         String message = response.getMessage();
         String status = response.getStatus();

@@ -50,9 +50,17 @@ public class PostsService {
         return postsRepository.findByPromoSiteLink(promoSiteLink);
     }
 
+    /*
     // 프로모션 이름으로 조회
     public List<Posts> getPostsByPromoSiteName(String promoSiteName) {
         return postsRepository.findByPromoSiteName(promoSiteName);
+    }
+
+     */
+
+    // 홍보하는 채널 아이디로 조회
+    public List<Posts> getPostsByPromoChannelId(String promoChannelId) {
+        return postsRepository.findByPromoChannelId(promoChannelId);
     }
 
     // 게시글 작성자 이름으로 조회
