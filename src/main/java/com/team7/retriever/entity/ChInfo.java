@@ -15,9 +15,9 @@ import java.util.Date;
 public class ChInfo {
     @Id
     @Field("_id")
-    private String _id;
-    @Field("id")
-    private long id;
+    private long _id;
+//    @Field("id")
+//    private long id;
     private String title;
     private String username;
     private Boolean restricted;

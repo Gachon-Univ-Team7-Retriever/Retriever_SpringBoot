@@ -30,8 +30,8 @@ public class WebCrawlingController {
 
     // DB에서 데이터 받아서 실행
     @PostMapping()
-    public WebCrawlingResponse webCrawling() {
-        return webCrawlingService.webCrawling();
+    public void webCrawling() {
+        webCrawlingService.webCrawling();
     }
 
     // DB에서 데이터 조회 결과 테스트

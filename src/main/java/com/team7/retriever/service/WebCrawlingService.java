@@ -27,8 +27,9 @@ public class WebCrawlingService {
     private final ChInfoService chInfoService;
     private final ArgotsService slangsService;
     private final PostSimilarityService postSimilarityService;
+    private final ChannelInfoService channelInfoService;
 
-    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService slangsService, PostSimilarityService postSimilarityService) {
+    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService slangsService, PostSimilarityService postSimilarityService, ChannelInfoService channelInfoService) {
         this.restTemplate = restTemplate;
         this.htmlCrawlingService = htmlCrawlingService;
         this.preprocessService = preprocessService;
@@ -37,6 +38,7 @@ public class WebCrawlingService {
         this.chInfoService = chInfoService;
         this.slangsService = slangsService;
         this.postSimilarityService = postSimilarityService;
+        this.channelInfoService = channelInfoService;
     }
 
     // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
@@ -102,7 +104,7 @@ public class WebCrawlingService {
                     if (chInfoService.isChannelExists(telegramResponse)) { // DB에 이미 정보가 존재하면 스킵
                         System.out.println("[WebCrawlingService] DB에 해당 채널이 이미 존재합니다 !");
                     } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 검문 모듈 실행
-                        channelCheckService.checkChannel(telegramResponse);
+                        channelInfoService.getChannelInfo(telegramResponse);
                     }
                 }
             } else {
@@ -110,8 +112,9 @@ public class WebCrawlingService {
             }
             System.out.println("[WebCrawlingService] 모든 결과에 대한 처리 완료 -------------------------------");
         }
-
+        System.out.println("[WebCrawlingService] 유사도 모듈 호출");
         postSimilarityService.calculateSimilarity();
+        System.out.println("[WebCrawlingService] 실행 완료");
         // return response.getBody();
     }
 

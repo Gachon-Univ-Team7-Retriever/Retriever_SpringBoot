@@ -52,13 +52,17 @@ public class PostSimilarityService {
     }
 
     public void calculateSimilarity() {
+        System.out.println("[PostSimilarityService] API 호출");
         String api = "http://127.0.0.1:5000/cluster/post_similarity";
-        ResponseEntity<Void> response = restTemplate.getForEntity(api, Void.class);
+        // ResponseEntity<Void> response = restTemplate.postForEntity(api, null, Void.class);
+        /*
         if (response.getStatusCode().is2xxSuccessful()) {
             System.out.println("[PostSimilarityService] 성공 !");
         } else {
             System.out.println("[PostSimilarityService] 실패");
         }
+        System.out.println("[PostSimilarityService] 실행 완료");
 
+         */
     }
 }

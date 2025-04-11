@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -15,9 +16,9 @@ public class ChannelInfoResponse {
     private String title;
     private String username;
     private Boolean restricted;
-    private LocalDateTime startedAt;
-    private LocalDateTime discoveredAt;
-    private LocalDateTime updatedAt;
+    private String startedAt;
+    private String discoveredAt;
+    private String updatedAt;
     private String status;
 
 }
