@@ -40,7 +40,7 @@ public class ChannelInfoService {
 
                 if (status != null && status.equals("active")) {
                     System.out.println("\t\t\t[ChannelInfoService] 채널 스크랩 시작 (" + title + ")");
-                    // chScrapeService.channelScrape(channel); // 소요 시간 때문에 주석 처리, 풀어줘야 함 !
+                    chScrapeService.channelScrape(inviteToken);
                     System.out.println("\t\t\t[ChannelInfoService] 채널 스크랩 실행 완료 (" + title + ")");
                 }
                 return body;

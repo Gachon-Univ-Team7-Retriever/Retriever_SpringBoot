@@ -25,18 +25,18 @@ public class WebCrawlingService {
     private final ChannelCheckService channelCheckService;
     private final PostHtmlService postHtmlService;
     private final ChInfoService chInfoService;
-    private final ArgotsService slangsService;
+    private final ArgotsService argotsService;
     private final PostSimilarityService postSimilarityService;
     private final ChannelInfoService channelInfoService;
 
-    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService slangsService, PostSimilarityService postSimilarityService, ChannelInfoService channelInfoService) {
+    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService argotsService, PostSimilarityService postSimilarityService, ChannelInfoService channelInfoService) {
         this.restTemplate = restTemplate;
         this.htmlCrawlingService = htmlCrawlingService;
         this.preprocessService = preprocessService;
         this.channelCheckService = channelCheckService;
         this.postHtmlService = postHtmlService;
         this.chInfoService = chInfoService;
-        this.slangsService = slangsService;
+        this.argotsService = argotsService;
         this.postSimilarityService = postSimilarityService;
         this.channelInfoService = channelInfoService;
     }
@@ -49,7 +49,7 @@ public class WebCrawlingService {
         String api = "http://127.0.0.1:5000/crawl/links";
 
         WebCrawlingRequest webCrawlingRequest = new WebCrawlingRequest();
-        webCrawlingRequest.setQueries(slangsService.getAllArgotsToList()); // 테스트 필요
+        webCrawlingRequest.setQueries(argotsService.getAllArgotsToList()); // 테스트 필요
         webCrawlingRequest.setMax(5);
 
         HttpEntity<WebCrawlingRequest> request = new HttpEntity<>(webCrawlingRequest);
