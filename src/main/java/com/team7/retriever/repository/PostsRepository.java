@@ -31,7 +31,9 @@ public interface PostsRepository extends MongoRepository<Posts, String> {
     List<Posts> findBySiteName(String siteName);
 
     // 프로모션 링크로 조회
-    List<Posts> findByPromoSiteLink(String promoSiteLink);
+    // List<Posts> findByPromoSiteLink(String promoSiteLink);
+    List<Posts> findByPromoSiteLinkContaining(String link);
+
 
     // 프로모션 이름으로 조회
     // List<Posts> findByPromoSiteName(String promoSiteName);

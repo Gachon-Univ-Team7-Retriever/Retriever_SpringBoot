@@ -46,8 +46,14 @@ public class PostsService {
     }
 
     // 프로모션 링크로 조회
+    /*
     public List<Posts> getPostsByPromoSiteLink(String promoSiteLink) {
         return postsRepository.findByPromoSiteLink(promoSiteLink);
+    }
+     */
+
+    public List<Posts> getPostsByPromoSiteLink(String link) {
+        return postsRepository.findByPromoSiteLinkContaining(link);
     }
 
     /*
