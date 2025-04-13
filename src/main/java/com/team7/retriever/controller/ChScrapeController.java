@@ -3,9 +3,7 @@ package com.team7.retriever.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team7.retriever.service.ChScrapeService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ChScrapeController {
@@ -13,6 +11,11 @@ public class ChScrapeController {
 
     public ChScrapeController(ChScrapeService chScrapeService) {
         this.chScrapeService = chScrapeService;
+    }
+
+    @GetMapping("/telegram/channel/scrape")
+    public void channelScrape(@RequestParam String channel) {
+        chScrapeService.channelScrape(channel);
     }
 
     // 정상 동작하는 기본 컨트롤러

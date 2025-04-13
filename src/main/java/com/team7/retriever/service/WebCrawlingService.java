@@ -25,27 +25,31 @@ public class WebCrawlingService {
     private final ChannelCheckService channelCheckService;
     private final PostHtmlService postHtmlService;
     private final ChInfoService chInfoService;
-    private final SlangsService slangsService;
+    private final ArgotsService argotsService;
+    private final PostSimilarityService postSimilarityService;
+    private final ChannelInfoService channelInfoService;
 
-    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, SlangsService slangsService) {
+    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService argotsService, PostSimilarityService postSimilarityService, ChannelInfoService channelInfoService) {
         this.restTemplate = restTemplate;
         this.htmlCrawlingService = htmlCrawlingService;
         this.preprocessService = preprocessService;
         this.channelCheckService = channelCheckService;
         this.postHtmlService = postHtmlService;
         this.chInfoService = chInfoService;
-        this.slangsService = slangsService;
+        this.argotsService = argotsService;
+        this.postSimilarityService = postSimilarityService;
+        this.channelInfoService = channelInfoService;
     }
 
     // 초(0-59) 분(0-59) 시간(0-23) 일(1-31) 월(1-12) 요일(0-6) (0: 일, 1: 월, 2:화, 3:수, 4:목, 5:금, 6:토)
     // initialDelay = 5000 -> 초기 5초 지연 시간 설정 -> 스케줄 안에 같이 넣는 것 (참고 용으로 기록)
     // @Scheduled(fixedDelay = 120000) // 테스트 용 - 한 사이클 종료 후 2분 지연 실행
     @Scheduled(cron = "0 0 5 * * *") // 매일 오전 5시마다 실행
-    public WebCrawlingResponse webCrawling() {
+    public void webCrawling() {
         String api = "http://127.0.0.1:5000/crawl/links";
 
         WebCrawlingRequest webCrawlingRequest = new WebCrawlingRequest();
-        webCrawlingRequest.setQueries(slangsService.getAllSlangsToList()); // 테스트 필요
+        webCrawlingRequest.setQueries(argotsService.getAllArgotsToList()); // 테스트 필요
         webCrawlingRequest.setMax(5);
 
         HttpEntity<WebCrawlingRequest> request = new HttpEntity<>(webCrawlingRequest);
@@ -100,7 +104,7 @@ public class WebCrawlingService {
                     if (chInfoService.isChannelExists(telegramResponse)) { // DB에 이미 정보가 존재하면 스킵
                         System.out.println("[WebCrawlingService] DB에 해당 채널이 이미 존재합니다 !");
                     } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 검문 모듈 실행
-                        channelCheckService.checkChannel(telegramResponse);
+                        channelInfoService.getChannelInfo(telegramResponse);
                     }
                 }
             } else {
@@ -108,9 +112,10 @@ public class WebCrawlingService {
             }
             System.out.println("[WebCrawlingService] 모든 결과에 대한 처리 완료 -------------------------------");
         }
-
-
-        return response.getBody();
+        System.out.println("[WebCrawlingService] 유사도 모듈 호출");
+        postSimilarityService.calculateSimilarity();
+        System.out.println("[WebCrawlingService] 실행 완료");
+        // return response.getBody();
     }
 
     /*

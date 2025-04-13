@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -31,8 +32,9 @@ public class PreprocessService {
     private final HtmlCrawlingService htmlCrawlingService;
     private final ChInfoService chInfoService;
     private final ChInfoRepository chInfoRepository;
+    private final ChannelInfoService channelInfoService;
 
-    public PreprocessService(RestTemplate restTemplate, PostsRepository postsRepository, PostsService postsService, ObjectMapper objectMapper, ChannelCheckService channelCheckService, HtmlCrawlingService htmlCrawlingService, ChInfoService chInfoService, ChInfoRepository chInfoRepository) {
+    public PreprocessService(RestTemplate restTemplate, PostsRepository postsRepository, PostsService postsService, ObjectMapper objectMapper, ChannelCheckService channelCheckService, HtmlCrawlingService htmlCrawlingService, ChInfoService chInfoService, ChInfoRepository chInfoRepository, ChannelInfoService channelInfoService) {
         this.restTemplate = restTemplate;
         this.postsRepository = postsRepository;
         this.postsService = postsService;
@@ -41,6 +43,7 @@ public class PreprocessService {
         this.htmlCrawlingService = htmlCrawlingService;
         this.chInfoService = chInfoService;
         this.chInfoRepository = chInfoRepository;
+        this.channelInfoService = channelInfoService;
     }
 
     // 스케줄 2 - 데이터 업데이트
@@ -109,9 +112,26 @@ public class PreprocessService {
                 System.out.println("\t\t[PreprocessService] 홍보글에 업데이트 사항이 있습니다");
                 saveData(html, link, content, telegrams);
                 System.out.println("\t\t[PreprocessService] 최신 데이터 저장 완료");
+                getChannelInfo(telegrams);
             }
         }
 
+    }
+
+    // 링크에서 도메인 추출
+    public String extractDomain(String link) {
+        try {
+            URL url = new URL(link);
+            String domain = url.getHost();
+
+            // domain = domain.replace("www.", "");
+
+            System.out.println("\t\t[PreprocessService] 도메인 추출 완료 : " + domain);
+            return domain;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     // 데이터 새로 저장
@@ -121,11 +141,11 @@ public class PreprocessService {
         Posts post = new Posts();
         post.setLink(link);
         post.setTag(null);
-        post.setSiteName(null);
+        post.setSiteName(extractDomain(link)); // 사이트 이름을 도메인으로 대체
         post.setTitle(null);
         post.setContent(content);
         post.setPromoSiteLink(Arrays.asList(telegrams.toString()));
-        post.setPromoSiteName(Arrays.asList(telegrams.toString()));
+        post.setPromoChannelId(Arrays.asList(telegrams.toString())); // 수정 필요
         post.setAuthor(null);
         post.setTimestamp(null);
         post.setCreatedAt(LocalDateTime.now());
@@ -135,6 +155,22 @@ public class PreprocessService {
 
         postsRepository.save(post);
     } // -> 수정 예정
+
+    public void getChannelInfo(List<String> telegrams) {
+        System.out.println("\t\t[PreprocessService] 추출된 채널: " + telegrams);
+        if (!telegrams.isEmpty()) {
+            for (String telegram : telegrams) {
+                if (chInfoService.isChannelExists(telegram)) { // DB에 이미 정보가 존재하면 스킵
+                    System.out.println("\t\t[PreprocessService] DB에 해당 채널이 이미 존재합니다 !");
+                    // ChInfo chInfo = chInfoRepository.findById(telegram).get();
+                    // chInfo.setPromoCount(chInfo.getPromoCount() + 1);
+                } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 정보 수집 모듈 실행
+                    // channelCheckService.checkChannel(telegram);
+                    channelInfoService.getChannelInfo(telegram);
+                }
+            }
+        }
+    }
 
     // 스케줄 1
     // 1. html 전처리
@@ -182,18 +218,24 @@ public class PreprocessService {
 
                 System.out.println("\t\t[PreprocessService] " + url + " saved");
 
+                /*
                 System.out.println("\t\t[PreprocessService] 추출된 채널: " + telegrams);
-                if (telegrams.size() > 0) {
+                if (!telegrams.isEmpty()) {
                     for (String telegram : telegrams) {
                         if (chInfoService.isChannelExists(telegram)) { // DB에 이미 정보가 존재하면 스킵
                             System.out.println("\t\t[PreprocessService] DB에 해당 채널이 이미 존재합니다 !");
-                            ChInfo chInfo = chInfoRepository.findById(telegram).get();
-                            chInfo.setPromoCount(chInfo.getPromoCount() + 1); // 테스트 필요
-                        } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 검문 모듈 실행
-                            channelCheckService.checkChannel(telegram);
+                            // ChInfo chInfo = chInfoRepository.findById(telegram).get();
+                            // chInfo.setPromoCount(chInfo.getPromoCount() + 1);
+                        } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 정보 수집 모듈 실행
+                            // channelCheckService.checkChannel(telegram);
+                            channelInfoService.getChannelInfo(telegram);
                         }
                     }
                 }
+
+                 */
+
+                getChannelInfo(telegrams);
             }
             return content;
         } catch (JsonProcessingException e) {

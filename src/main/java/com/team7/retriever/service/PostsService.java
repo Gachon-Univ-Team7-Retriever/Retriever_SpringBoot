@@ -46,13 +46,27 @@ public class PostsService {
     }
 
     // 프로모션 링크로 조회
+    /*
     public List<Posts> getPostsByPromoSiteLink(String promoSiteLink) {
         return postsRepository.findByPromoSiteLink(promoSiteLink);
     }
+     */
 
+    public List<Posts> getPostsByPromoSiteLink(String link) {
+        return postsRepository.findByPromoSiteLinkContaining(link);
+    }
+
+    /*
     // 프로모션 이름으로 조회
     public List<Posts> getPostsByPromoSiteName(String promoSiteName) {
         return postsRepository.findByPromoSiteName(promoSiteName);
+    }
+
+     */
+
+    // 홍보하는 채널 아이디로 조회
+    public List<Posts> getPostsByPromoChannelId(String promoChannelId) {
+        return postsRepository.findByPromoChannelId(promoChannelId);
     }
 
     // 게시글 작성자 이름으로 조회

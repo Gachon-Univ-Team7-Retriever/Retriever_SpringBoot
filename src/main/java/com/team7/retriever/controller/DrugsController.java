@@ -38,18 +38,22 @@ public class DrugsController {
         return drugsService.getDrugsByType(drugType);
     }
 
-    // 상태로 조회
-    @GetMapping("/status/{status}")
-    public List<Drugs> getDrugsByStatus(@PathVariable String status) {
-        return drugsService.getDrugsByStatus(status);
-    }
-
     // 전체 조회
     @GetMapping("/all")
     public List<Drugs> getAllDrugs() {
         return drugsService.getAllDrugs();
     }
 
+    /*
+    // 상태로 조회
+    @GetMapping("/status/{status}")
+    public List<Drugs> getDrugsByStatus(@PathVariable String status) {
+        return drugsService.getDrugsByStatus(status);
+    }
+
+     */
+
+    /*
     // count 큰 순으로 정렬하여 [전체] 조회
     @GetMapping("/sorted")
     public List<Drugs> getDrugsSortedByCount() {
@@ -67,4 +71,6 @@ public class DrugsController {
     public List<Drugs> getDrugsByStatusSortedByCount(@PathVariable String status) {
         return drugsService.getDrugsByStatusSortedByCount(status);
     }
+
+     */
 }

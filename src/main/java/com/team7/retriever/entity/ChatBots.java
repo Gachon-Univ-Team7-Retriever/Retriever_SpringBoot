@@ -16,4 +16,5 @@ public class ChatBots {
     private long channelId;
     private LocalDateTime updatedAt;
     private List<Integer> chatIds = new ArrayList<>();
+
 }

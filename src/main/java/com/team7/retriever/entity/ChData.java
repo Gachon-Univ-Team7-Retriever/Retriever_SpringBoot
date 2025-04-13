@@ -22,11 +22,13 @@ public class ChData {
     private LocalDateTime timestamp;
     private String text;
     private senderInfo sender;
-    private int views;
+    private Integer views; // *** null 일 수도 있는 값은 primitive -> Wrapper ***
     private String url;
     @Field("id")
     private int id;
     private media media;
+    private List<String> argot;
+    private List<String> drugs;
 
     @Getter
     public static class senderInfo {
@@ -41,4 +43,5 @@ public class ChData {
         private String url;
         private String type;
     }
+
 }

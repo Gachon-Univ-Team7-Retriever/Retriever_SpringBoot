@@ -1,11 +1,13 @@
 package com.team7.retriever.service;
 
+import com.team7.retriever.dto.ChatArgotDrugDTO;
 import com.team7.retriever.entity.ChData;
 import com.team7.retriever.repository.ChDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChDataService {
@@ -45,5 +47,18 @@ public class ChDataService {
     // 메시지 내용으로 조회 (포함되는 것)
     public List<ChData> getChannelDataByText(String text) {
         return chDataRepository.findByText(text);
+    }
+
+    public List<ChatArgotDrugDTO> getArgotDrugsData() {
+        List<ChData> chDataList = chDataRepository.findAll();
+
+        return chDataList.stream()
+                .map(chData -> new ChatArgotDrugDTO(
+                        chData.getId(),
+                        chData.getArgot(),
+                        chData.getDrugs(),
+                        chData.getTimestamp()
+                ))
+                .collect(Collectors.toList());
     }
 }

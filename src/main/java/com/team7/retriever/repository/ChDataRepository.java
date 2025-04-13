@@ -23,7 +23,7 @@ public interface ChDataRepository extends MongoRepository<ChData, String> {
     List<ChData> findByUrl(String url);
 
     // 메시지 내용으로 조회 (포함되는 것)
-    @Query("{ 'text':  { $regex: ?0, $options:  'i' } }")
+    @Query("{ 'text':  { $regex: ?0, $options: 'i' } }")
     List<ChData> findByText(String text);
 }
 
