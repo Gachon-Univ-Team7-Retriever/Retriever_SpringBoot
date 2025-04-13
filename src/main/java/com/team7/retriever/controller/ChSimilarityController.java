@@ -28,7 +28,7 @@ public class ChSimilarityController {
     }
 
     @GetMapping("/chId/{channelId}")
-    public ChannelSimilarity getChannelSimilarityByChannelId(@PathVariable String channelId) {
+    public ChannelSimilarity getChannelSimilarityByChannelId(@PathVariable long channelId) {
         return chSimilarityService.getChannelSimilarityByChannelId(channelId);
     }
 }

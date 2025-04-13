@@ -30,7 +30,7 @@ public class ChSimilarityService {
     }
 
     // 채널 아이디로 조회
-    public ChannelSimilarity getChannelSimilarityByChannelId(String channelId) {
+    public ChannelSimilarity getChannelSimilarityByChannelId(long channelId) {
         ChannelSimilarity chSimilarity = chSimilarityRepository.findByChannelId(channelId);
         if (chSimilarity != null) {
             sortSimilarChannelsBySimilarity(chSimilarity);

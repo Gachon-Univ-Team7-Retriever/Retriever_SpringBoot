@@ -28,21 +28,17 @@ public class PreprocessService {
     private final PostsRepository postsRepository;
     private final PostsService postsService;
     private final ObjectMapper objectMapper;
-    private final ChannelCheckService channelCheckService;
     private final HtmlCrawlingService htmlCrawlingService;
     private final ChInfoService chInfoService;
-    private final ChInfoRepository chInfoRepository;
     private final ChannelInfoService channelInfoService;
 
-    public PreprocessService(RestTemplate restTemplate, PostsRepository postsRepository, PostsService postsService, ObjectMapper objectMapper, ChannelCheckService channelCheckService, HtmlCrawlingService htmlCrawlingService, ChInfoService chInfoService, ChInfoRepository chInfoRepository, ChannelInfoService channelInfoService) {
+    public PreprocessService(RestTemplate restTemplate, PostsRepository postsRepository, PostsService postsService, ObjectMapper objectMapper, HtmlCrawlingService htmlCrawlingService, ChInfoService chInfoService, ChannelInfoService channelInfoService) {
         this.restTemplate = restTemplate;
         this.postsRepository = postsRepository;
         this.postsService = postsService;
         this.objectMapper = objectMapper;
-        this.channelCheckService = channelCheckService;
         this.htmlCrawlingService = htmlCrawlingService;
         this.chInfoService = chInfoService;
-        this.chInfoRepository = chInfoRepository;
         this.channelInfoService = channelInfoService;
     }
 

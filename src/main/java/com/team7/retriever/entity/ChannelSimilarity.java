@@ -14,13 +14,13 @@ import java.util.List;
 public class ChannelSimilarity {
     @Id
     private String id;
-    private String channelId;
+    private long channelId;
     private List<SimilarChannel> similarChannels;
     private LocalDateTime updatedAt;
 
     @Getter
     public static class SimilarChannel {
-        private String similarChannel;
+        private long similarChannel;
         private Double similarity;
     }
 
