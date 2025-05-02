@@ -20,7 +20,7 @@ public class ChannelSimilarity {
 
     @Getter
     public static class SimilarChannel {
-        private long similarChannel;
+        private long channelId;
         private Double similarity;
     }
 
