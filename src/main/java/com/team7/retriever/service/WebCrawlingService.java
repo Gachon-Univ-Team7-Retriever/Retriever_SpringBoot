@@ -49,7 +49,7 @@ public class WebCrawlingService {
         String api = "http://127.0.0.1:5000/crawl/links";
 
         WebCrawlingRequest webCrawlingRequest = new WebCrawlingRequest();
-        webCrawlingRequest.setQueries(argotsService.getAllArgotsToList()); // 테스트 필요
+        webCrawlingRequest.setQueries(argotsService.getAllArgotsToList());
         webCrawlingRequest.setMax(5);
 
         HttpEntity<WebCrawlingRequest> request = new HttpEntity<>(webCrawlingRequest);
