@@ -28,27 +28,30 @@ public class ChDataController {
     }
 
     // 유저 아이디로 채팅 조회
-    @GetMapping("/user/id/{senderID}") // 신규
+    @GetMapping("/user/id/{senderID}")
     public List<ChData> getChannelDataBySenderId(@PathVariable long senderID) {
         return chDataService.getChannelDataBySenderId(senderID);
     }
 
-    @GetMapping("/user/name/{senderName}") // 신규
+    // 유저 이름으로 채팅 조회
+    @GetMapping("/user/name/{senderName}")
     public List<ChData> getChannelDataBySenderName(@PathVariable String senderName) {
         return chDataService.getChannelDataBySederName(senderName);
     }
 
-    // 메시지 url로 채팅 조회 (채팅 각각에 다 있음)
+    // 메시지 url로 채팅 조회
     @GetMapping("/by-msg-url")
     public List<ChData> getChannelDataByMsgUrl(@RequestParam String msgUrl) {
         return chDataService.getChannelDataByUrl(msgUrl);
     }
 
-    @GetMapping("/text") // 신규
+    // 채팅 내용에 포함
+    @GetMapping("/text")
     public List<ChData> getChannelDataByText(@RequestParam String text) {
         return chDataService.getChannelDataByText(text);
     }
 
+    // argot & drugs data
     @GetMapping("/data")
     public List<ChatArgotDrugDTO> getArgotDrugsData() {
         return chDataService.getArgotDrugsData();

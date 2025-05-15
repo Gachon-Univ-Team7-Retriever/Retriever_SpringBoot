@@ -22,18 +22,16 @@ public class WebCrawlingService {
     private final RestTemplate restTemplate;
     private final HtmlCrawlingService htmlCrawlingService;
     private final PreprocessService preprocessService;
-    private final ChannelCheckService channelCheckService;
     private final PostHtmlService postHtmlService;
     private final ChInfoService chInfoService;
     private final ArgotsService argotsService;
     private final PostSimilarityService postSimilarityService;
     private final ChannelInfoService channelInfoService;
 
-    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, ChannelCheckService channelCheckService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService argotsService, PostSimilarityService postSimilarityService, ChannelInfoService channelInfoService) {
+    public WebCrawlingService(RestTemplate restTemplate, HtmlCrawlingService htmlCrawlingService, PreprocessService preprocessService, PostHtmlService postHtmlService, ChInfoService chInfoService, ArgotsService argotsService, PostSimilarityService postSimilarityService, ChannelInfoService channelInfoService) {
         this.restTemplate = restTemplate;
         this.htmlCrawlingService = htmlCrawlingService;
         this.preprocessService = preprocessService;
-        this.channelCheckService = channelCheckService;
         this.postHtmlService = postHtmlService;
         this.chInfoService = chInfoService;
         this.argotsService = argotsService;
@@ -90,7 +88,7 @@ public class WebCrawlingService {
                     // 링크 -> html -> 전처리
                 }
             } else {
-                System.out.println("[WebCrawlingService] No google found"); // 결과 자체가 null이 아니라 []을 반환하는 건지?
+                System.out.println("[WebCrawlingService] No google found");
             }
 
             // telegram

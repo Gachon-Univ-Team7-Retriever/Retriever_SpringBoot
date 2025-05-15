@@ -52,37 +52,15 @@ public class HtmlCrawlingService {
     }
 
     public void saveHtml(String html, String url) {
-        PostHtml postHtml;
         LocalDateTime now = LocalDateTime.now();
-        // String id = "html_" + url; // 아이디 자동 생성
-
-        postHtml = new PostHtml();
-        postHtml.setHtml(html);
-        postHtml.setUrl(url);
-        postHtml.setCreatedAt(now);
-        postHtml.setUpdatedAt(now);
+        PostHtml postHtml = PostHtml.builder()
+                .html(html)
+                .url(url)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
         postHtmlRepository.save(postHtml);
         System.out.println("\t[HtmlCrawlingService] " + url + " saved"); // test code
 
-        // DB에 존재하지 않아야 실행되도록 수정됨 -> 아래 코드 삭제
-        /*
-        Optional<PostHtml> existingEntry = postHtmlRepository.findById(id);
-        if (!existingEntry.isPresent()) { // DB에 존재하지 않으면
-            postHtml = new PostHtml();
-            postHtml.setId(id);
-            postHtml.setPostId("post_" + url);
-            postHtml.setCreatedAt(now);
-            postHtml.setUrl(url);
-        } else  { // DB에 이미 존재하는 경우 (update)
-            System.out.println("\t[HtmlCrawlingService] " + id + " is already exist"); // test code
-            postHtml = existingEntry.get();
-        }
-        postHtml.setHtml(html); // 삭제된 게시물이 html 단계에서 걸러지는 거면 이거 if 안으로 넣어야 됨
-        postHtml.setUpdatedAt(now);
-        postHtmlRepository.save(postHtml);
-        System.out.println("\t[HtmlCrawlingService] " + id + " saved"); // test code
-        // DB 저장 완료
-
-         */
     }
 }

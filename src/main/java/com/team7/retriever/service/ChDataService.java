@@ -26,7 +26,7 @@ public class ChDataService {
 
     // 유저 아이디로 조회
     public List<ChData> getChannelDataBySenderId(long id) {
-        return chDataRepository.findBySender_Id(id);
+        return chDataRepository.findBySender_SenderId(id);
     }
 
     // 유저 이름으로 조회

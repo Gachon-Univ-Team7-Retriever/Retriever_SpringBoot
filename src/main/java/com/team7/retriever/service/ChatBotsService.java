@@ -20,12 +20,10 @@ public class ChatBotsService {
     }
 
     // id
-    public Optional<ChatBots> getChatBotsById(String id) {
-        return chatBotsRepository.findById(id);
-    }
+    public Optional<ChatBots> getChatBotsById(long id) { return chatBotsRepository.findById(id); }
 
-    // channel id
-    public List<ChatBots> getChatBotsByChannelId(int channelId) {
-        return chatBotsRepository.findByChannelId(channelId);
+    // channels
+    public List<ChatBots> getChatBotsByChannels(List<Long> channelIds) {
+        return chatBotsRepository.findByChannelsIn(channelIds);
     }
 }

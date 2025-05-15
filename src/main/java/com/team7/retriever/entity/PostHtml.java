@@ -1,5 +1,6 @@
 package com.team7.retriever.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -19,5 +20,13 @@ public class PostHtml {
     private String url; /* 250102 추가 */
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Builder
+    public PostHtml(String html, String url, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.html = html;
+        this.url = url;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
 }
