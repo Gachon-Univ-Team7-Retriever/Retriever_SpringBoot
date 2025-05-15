@@ -17,13 +17,6 @@ public class UpdateCheckService {
     }
 
     public void getAllPost() {
-        /*
-        List<String> allLinks = postsService.getAllPosts().stream()
-                .filter(post -> !post.isDeleted())
-                .map(Posts::getLink)
-                .toList();
-        */
-
         List<String> allLinks = postsService.getAllPostsForUpdate();
 
         for (String link : allLinks) {

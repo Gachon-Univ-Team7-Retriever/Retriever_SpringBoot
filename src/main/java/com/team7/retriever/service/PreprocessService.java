@@ -117,13 +117,7 @@ public class PreprocessService {
         }
     }
 
-    // 위 메서드에서 세이브 데이터 하기 전에, 체널 비교 메서드 호출
-    // 채널 비교 메서드는 ?
-    // 리스트 비교 방법 찾아보기
-    // for문 돌면서 기존 리스트에 해당 채널이 있는지 체크하거나
-
-    // Neo4j도 여기에 끼워넣어야 함 !
-    
+    // Neo4j
 
     // 링크에서 도메인 추출
     public String extractDomain(String link) {
@@ -162,7 +156,7 @@ public class PreprocessService {
                 .build();
 
         postsRepository.save(post);
-    } // -> 수정 예정
+    }
 
     public void getChannelInfo(List<String> telegrams) {
         System.out.println("\t\t[PreprocessService] 추출된 채널: " + telegrams);
@@ -211,37 +205,11 @@ public class PreprocessService {
             System.out.println("\t\t[PreprocessService] 전처리 결과: " + content);
             if (Objects.equals(content, "null") || content == null) {
                 System.out.println("\t\t[PreprocessService] 마약 관련 홍보글이 아닙니다!");
-                /*
-                if (existingEntry.isPresent()) { // DB에 존재하면
-                    post = existingEntry.get();
-                    post.setDeletedAt(now);
-                }
-                */
             } else { // 마약 관련 홍보글인 경우
                 System.out.println("\t\t[PreprocessService] 마약 관련 홍보글입니다!");
-                // System.out.println(content);
-                // htmlCrawlingService.saveHtml(html, url); // 홍보글이라고 판단됨 -> html 저장
-
                 saveData(html, url, content, telegrams); // 저장
 
                 System.out.println("\t\t[PreprocessService] " + url + " saved");
-
-                /*
-                System.out.println("\t\t[PreprocessService] 추출된 채널: " + telegrams);
-                if (!telegrams.isEmpty()) {
-                    for (String telegram : telegrams) {
-                        if (chInfoService.isChannelExists(telegram)) { // DB에 이미 정보가 존재하면 스킵
-                            System.out.println("\t\t[PreprocessService] DB에 해당 채널이 이미 존재합니다 !");
-                            // ChInfo chInfo = chInfoRepository.findById(telegram).get();
-                            // chInfo.setPromoCount(chInfo.getPromoCount() + 1);
-                        } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 정보 수집 모듈 실행
-                            // channelCheckService.checkChannel(telegram);
-                            channelInfoService.getChannelInfo(telegram);
-                        }
-                    }
-                }
-
-                 */
 
                 getChannelInfo(telegrams);
             }
