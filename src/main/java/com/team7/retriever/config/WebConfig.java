@@ -1,4 +1,4 @@
-package com.team7.retriever;
+package com.team7.retriever.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

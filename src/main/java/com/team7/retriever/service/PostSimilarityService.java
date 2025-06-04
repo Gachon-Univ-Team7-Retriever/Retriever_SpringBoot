@@ -3,14 +3,16 @@ package com.team7.retriever.service;
 
 import com.team7.retriever.entity.PostSimilarity;
 import com.team7.retriever.repository.PostSimilarityRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
+@Slf4j
 public class PostSimilarityService {
 
     private final RestTemplate restTemplate;
@@ -53,16 +55,41 @@ public class PostSimilarityService {
 
     public void calculateSimilarity() {
         System.out.println("[PostSimilarityService] API 호출");
-        String api = "http://127.0.0.1:5000/cluster/post_similarity";
-        // ResponseEntity<Void> response = restTemplate.postForEntity(api, null, Void.class);
+        log.info("[PostSimilarityService] API 호출");
+        String api1 = "http://127.0.0.1:5000/cluster/post_update";
+        String api2 = "http://127.0.0.1:5000/cluster/post_cluster";
         /*
-        if (response.getStatusCode().is2xxSuccessful()) {
+        ResponseEntity<Map> response = restTemplate.getForEntity(api1, Map.class);
+
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            String message = response.getBody().get("message").toString();
+            System.out.println("[PostSimilarityService] message: " + message);
             System.out.println("[PostSimilarityService] 성공 !");
         } else {
             System.out.println("[PostSimilarityService] 실패");
         }
         System.out.println("[PostSimilarityService] 실행 완료");
 
+        ResponseEntity<Map> response2 = restTemplate.getForEntity(api1, Map.class);
+
+        if (response2.getStatusCode().is2xxSuccessful() && response2.getBody() != null) {
+            String message = response2.getBody().get("message").toString();
+            int totla_document = Integer.parseInt(response2.getBody().get("total_documents").toString());
+            int noise_document = Integer.parseInt(response2.getBody().get("noise_documents").toString());
+            float silhouette_score = Float.parseFloat(response2.getBody().get("silhouette_score").toString());
+
+            System.out.println("[PostSimilarityService] message: " + message);
+            System.out.println("[PostSimilarityService] totla_document: " + totla_document);
+            System.out.println("[PostSimilarityService] noise_document: " + noise_document);
+            System.out.println("[PostSimilarityService] silhouette_score: " + silhouette_score);
+
+            System.out.println("[PostSimilarityService] 성공 !");
+        } else {
+            System.out.println("[PostSimilarityService] 실패");
+        }
+
          */
+        System.out.println("[PostSimilarityService] 실행 완료");
+
     }
 }

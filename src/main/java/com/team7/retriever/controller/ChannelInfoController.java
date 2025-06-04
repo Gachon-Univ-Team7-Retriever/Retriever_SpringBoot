@@ -16,7 +16,7 @@ public class ChannelInfoController {
     }
 
     @GetMapping
-    public void getChannelInfo(@RequestParam String token) {
-        channelInfoService.getChannelInfo(token);
+    public void getChannelInfo(@RequestParam String token, @RequestParam String postId) {
+        channelInfoService.getChannelInfo(token, postId);
     }
 }

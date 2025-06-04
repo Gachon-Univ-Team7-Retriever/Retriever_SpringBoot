@@ -3,14 +3,9 @@ package com.team7.retriever.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.team7.retriever.entity.ChInfo;
+import com.team7.retriever.dto.PreprocessResponse;
 import com.team7.retriever.entity.Posts;
-import com.team7.retriever.repository.ChInfoRepository;
 import com.team7.retriever.repository.PostsRepository;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +35,7 @@ public class PreprocessService {
     }
 
     // 스케줄 2 - 데이터 업데이트
-    public String updatePreprocess(String html, String link) {
+    public String updatePreprocess(String html, String link, String title, String source) {
         String api = "http://127.0.0.1:5000/preprocess/extract/web-promotion";
 
         Map<String, String> requestBody = Map.of("html", html);
@@ -67,7 +62,7 @@ public class PreprocessService {
                 System.out.println("\t\t[PreprocessService] 마약 관련 홍보글입니다!");
                 // 해당 링크 모든 데이터 updatedAt 업데이트
                 // 해당 링크로 새로운 데이터 DB에 저장
-                updateData(html, link, content, telegrams);
+                updateData(html, link, title, source, content, telegrams);
                 System.out.println("\t\t[PreprocessService] 데이터 업데이트 완료");
             }
             return content;
@@ -102,7 +97,7 @@ public class PreprocessService {
     // 데이터 업데이트
     // 1. 업데이트 시각 변경
     // 2. 업데이트 사항 있으면 새 데이터 저장 (데이터 저장 메서드 호출)
-    private void updateData(String html, String link, String content, List<String> telegrams) {
+    private void updateData(String html, String link, String title, String source, String content, List<String> telegrams) {
         List<Posts> posts = postsService.getPostsByLink(link);
         for (Posts post : posts) {
             post.updateTimestampToNow(); // 테스트 필요
@@ -111,13 +106,11 @@ public class PreprocessService {
 
         if (isContentUpdated(posts, content)) { // 본문 내용이 동일하지 않으면
             System.out.println("\t\t[PreprocessService] 홍보글에 업데이트 사항이 있습니다");
-            saveData(html, link, content, telegrams);
+            String savedId = saveData(html, link, title, source, content, telegrams);
             System.out.println("\t\t[PreprocessService] 최신 데이터 저장 완료");
-            getChannelInfo(telegrams);
+            getChannelInfo(telegrams, savedId);
         }
     }
-
-    // Neo4j
 
     // 링크에서 도메인 추출
     public String extractDomain(String link) {
@@ -136,29 +129,34 @@ public class PreprocessService {
     }
 
     // 데이터 새로 저장
-    private void saveData(String html, String link, String content, List<String> telegrams) {
-        htmlCrawlingService.saveHtml(html, link);
-
+    private String saveData(String html, String link, String title, String source, String content, List<String> telegrams) {
         Posts post = Posts.builder()
                 .link(link)
-                .tag(null)
+                .tag(null) // X
+                .source(source)
                 .siteName(extractDomain(link))
-                .title(null)
+                .title(title)
                 .content(content)
-                .promoSiteLink(List.of(telegrams.toString()))
-                .promoChannelId(List.of(telegrams.toString())) // 수정 필요
-                .author(null)
-                .timestamp(null)
+                .promoSiteLink(List.of(telegrams.toString())) // or List.copyOf(telegrams) ?
+                .promoChannelId(null) // 채널 정보 수집 후에 저장됨
+                .author(null) // X
+                .timestamp(null) // X
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .deletedAt(null)
                 .deleted(false)
                 .build();
 
-        postsRepository.save(post);
+        Posts saved = postsRepository.save(post);
+        String savedId = saved.getId();
+        System.out.println("\t\t[PreprocessService] 저장된 게시글 ID: " + savedId);
+
+        htmlCrawlingService.saveHtml(savedId, html, link);
+
+        return savedId;
     }
 
-    public void getChannelInfo(List<String> telegrams) {
+    public void getChannelInfo(List<String> telegrams, String savedId) {
         System.out.println("\t\t[PreprocessService] 추출된 채널: " + telegrams);
         if (!telegrams.isEmpty()) {
             for (String telegram : telegrams) {
@@ -168,7 +166,9 @@ public class PreprocessService {
                     // chInfo.setPromoCount(chInfo.getPromoCount() + 1);
                 } else { // DB에 해당 채널 아이디가 존재하지 않으면 채널 정보 수집 모듈 실행
                     // channelCheckService.checkChannel(telegram);
-                    channelInfoService.getChannelInfo(telegram);
+                    System.out.println("\t\t[PreprocessService] channelInfo 실행");
+                    channelInfoService.getChannelInfo(telegram, savedId);
+                    System.out.println("\t\t[PreprocessService] channelInfo 실행 완료");
                 }
             }
         }
@@ -179,7 +179,7 @@ public class PreprocessService {
     // 2. 본문에서 텔레그램 채널 추출 시
     //  2.1. 해당 채널이 DB에 있으면 홍보글 개수 업데이트
     //  2.2. 없으면 검문 서비스 호출
-    public void htmlPreprocess(String url, String html) {
+    public void htmlPreprocess(String url, String title, String source, String html) {
         String api = "http://127.0.0.1:5000/preprocess/extract/web-promotion";
 
         Map<String, String> requestBody = Map.of("html", html);
@@ -207,16 +207,54 @@ public class PreprocessService {
                 System.out.println("\t\t[PreprocessService] 마약 관련 홍보글이 아닙니다!");
             } else { // 마약 관련 홍보글인 경우
                 System.out.println("\t\t[PreprocessService] 마약 관련 홍보글입니다!");
-                saveData(html, url, content, telegrams); // 저장
+                String savedId = saveData(html, url, title, source, content, telegrams); // 저장
 
                 System.out.println("\t\t[PreprocessService] " + url + " saved");
 
-                getChannelInfo(telegrams);
+                getChannelInfo(telegrams, savedId);
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException("\t\t[PreprocessService] JSON 파싱 중 오류 발생: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("\t\t[PreprocessService] HTML 전처리 중 오류 발생: " + e.getMessage(), e);
+        }
+    }
+
+    public void htmlPreprocessAi(String url, String title, String source, String html) {
+        String api = "http://127.0.0.1:5000//preprocess/extract/web-promotion/openai";
+
+        Map<String, String> requestBody = Map.of("html", html);
+
+        try {
+            ResponseEntity<PreprocessResponse> response = restTemplate.postForEntity(
+                    api,
+                    requestBody,
+                    PreprocessResponse.class
+            );
+
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new RuntimeException("\t\t[PreprocessService] HTML 전처리(AI) 실패: " + response.getStatusCode());
+            }
+
+            PreprocessResponse responseDto = response.getBody();
+
+            String content = responseDto.getPromotionContent();
+            List<String> telegrams = responseDto.getTelegrams();
+
+            System.out.println("\t\t[PreprocessService] (AI) 전처리 결과: " + content);
+
+            if (content == null || content.equals("null")) {
+                System.out.println("\t\t[PreprocessService] (AI) 마약 관련 홍보글이 아닙니다!");
+            } else {
+                System.out.println("\t\t[PreprocessService] (AI) 마약 관련 홍보글입니다!");
+                String savedId = saveData(html, url, title, source, content, telegrams); // 저장
+                System.out.println("\t\t[PreprocessService] (AI) " + url + " saved");
+
+                getChannelInfo(telegrams, savedId);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("\t\t[PreprocessService] (AI) HTML 전처리 중 오류 발생: " + e.getMessage(), e);
         }
     }
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChannelInfoResponse {
 
-    private long id;
+    private Long id;
     private String title;
     private String username;
     private Boolean restricted;

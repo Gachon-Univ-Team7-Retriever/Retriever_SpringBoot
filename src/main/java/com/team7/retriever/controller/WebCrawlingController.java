@@ -1,6 +1,5 @@
 package com.team7.retriever.controller;
 
-import com.team7.retriever.dto.WebCrawlingResponse;
 import com.team7.retriever.service.ArgotsService;
 import com.team7.retriever.service.UpdateCheckService;
 import com.team7.retriever.service.WebCrawlingService;
@@ -28,10 +27,19 @@ public class WebCrawlingController {
     }
      */
 
+    /*
     // DB에서 데이터 받아서 실행
     @PostMapping()
     public void webCrawling() {
         webCrawlingService.webCrawling();
+    }
+
+     */
+
+    // SerpAPI
+    @GetMapping
+    public void webCrawlSerp() {
+        webCrawlingService.webCrawlingSerpApi();
     }
 
     // DB에서 데이터 조회 결과 테스트
@@ -43,7 +51,7 @@ public class WebCrawlingController {
     // DB 데이터 업데이트 사항 확인
     @GetMapping("/updates")
     public void updateCheck() {
-        updateCheckService.getAllPost();
+        updateCheckService.updateAllPost();
     }
 
     /*

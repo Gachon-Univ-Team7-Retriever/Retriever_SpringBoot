@@ -10,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 @Document(collection = "posts")
 public class Posts {
 
@@ -29,27 +30,6 @@ public class Posts {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private boolean deleted;
-
-
-    @Builder
-    public Posts(String link, String tag, String siteName, String title, String content,
-                 List<String> promoSiteLink, List<String> promoChannelId, String author,
-                 LocalDateTime timestamp, LocalDateTime createdAt, LocalDateTime updatedAt,
-                 LocalDateTime deletedAt, boolean deleted) {
-        this.link = link;
-        this.tag = tag;
-        this.siteName = siteName;
-        this.title = title;
-        this.content = content;
-        this.promoSiteLink = promoSiteLink;
-        this.promoChannelId = promoChannelId;
-        this.author = author;
-        this.timestamp = timestamp;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
-        this.deleted = deleted;
-    }
 
     public void updateTimestampToNow() {
         this.updatedAt = LocalDateTime.now();

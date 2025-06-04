@@ -1,7 +1,6 @@
 package com.team7.retriever.controller;
 
 import com.team7.retriever.dto.ChannelInfoResponse;
-import com.team7.retriever.service.ChScrapeService;
 import com.team7.retriever.service.ChannelInfoService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +16,7 @@ public class ChannelCheckController {
     }
 
     @PostMapping
-    public ChannelInfoResponse channelInfo(@RequestParam String token) {
-        return channelInfoService.getChannelInfo(token);
+    public ChannelInfoResponse channelInfo(@RequestParam String token, @RequestParam String postId) {
+        return channelInfoService.getChannelInfo(token, postId);
     }
 }
