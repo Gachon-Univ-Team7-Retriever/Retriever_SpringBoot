@@ -24,6 +24,8 @@ public class SavingPromotionService {
 
     @Transactional
     public void createPromotionRelation(Long channelId, String postId) {
+        System.out.println("[Neo4j Service] chabbelId: " + channelId);
+        System.out.println("[Neo4j Service] postId: " + postId);
         // 채널 노드 조회 or 생성
         Channel channel = neoChannelRepository.findByChannelId(channelId)
                 .orElseGet(() -> {

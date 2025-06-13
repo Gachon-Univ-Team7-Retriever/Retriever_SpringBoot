@@ -30,15 +30,20 @@ public class ChannelInfoService {
     public ChannelInfoResponse getChannelInfo(String inviteToken, String savedPostId) {
         String api = "http://127.0.0.1:5000/telegram/channel/info";
         Map<String, String> requestBody = Map.of("channel_key", inviteToken);
+        System.out.println("\t\t\t[ChannelInfoService] inviteToken: " + inviteToken);
 
         try {
             ResponseEntity<ChannelInfoResponse> response = restTemplate.postForEntity(api, requestBody, ChannelInfoResponse.class);
+            System.out.println("\t\t\t[ChannelInfoService] 채널 정보 수집 결과: " + response.getBody());
 
             ChannelInfoResponse body = response.getBody();
             if (body != null) {
                 String title = body.getTitle();
                 String status = body.getStatus();
                 Long channelId = body.getId();
+                System.out.println("\t\t\t[ChannelInfoService] title: " + title);
+                System.out.println("\t\t\t[ChannelInfoService] status: " + status);
+                System.out.println("\t\t\t[ChannelInfoService] channelId: " + channelId);
 
                 System.out.println("\t\t\t[ChannelInfoService] 채널 검문 결과 (" + title + ") " + status);
                 log.info("\t\t\t[ChannelInfoService] 채널 검문 결과 (" + title + ") " + status);

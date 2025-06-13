@@ -1,14 +1,14 @@
 package com.team7.retriever.controller;
 
 import com.team7.retriever.service.PreprocessService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/preprocess")
 public class PreprocessController {
-    @Autowired
-    private PreprocessService preprocessService;
+    private final PreprocessService preprocessService;
 
     @GetMapping("/extract-domain")
     public String extractDomain(@RequestParam String url) {

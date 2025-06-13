@@ -3,17 +3,18 @@ package com.team7.retriever.controller;
 
 import com.team7.retriever.entity.ChInfo;
 import com.team7.retriever.service.ChInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/channels")
 public class ChInfoController {
-    @Autowired
-    private ChInfoService infoService;
+
+    private final ChInfoService infoService;
 
     // 전체 채널 조회
     @GetMapping("/all")

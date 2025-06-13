@@ -1,20 +1,19 @@
 package com.team7.retriever.controller;
 
-import com.team7.retriever.dto.PostLinkRequest;
 import com.team7.retriever.entity.Posts;
 import com.team7.retriever.service.PostsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/posts")
 public class PostsController {
 
-    @Autowired
-    private PostsService postsService;
+    private final PostsService postsService;
 
     // 전체 게시글 조회
     @GetMapping("/all")

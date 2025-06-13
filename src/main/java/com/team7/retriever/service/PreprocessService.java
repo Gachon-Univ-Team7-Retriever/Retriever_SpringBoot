@@ -233,28 +233,29 @@ public class PreprocessService {
             );
 
             if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-                throw new RuntimeException("\t\t[PreprocessService] HTML 전처리(AI) 실패: " + response.getStatusCode());
-            }
-
-            PreprocessResponse responseDto = response.getBody();
-
-            String content = responseDto.getPromotionContent();
-            List<String> telegrams = responseDto.getTelegrams();
-
-            System.out.println("\t\t[PreprocessService] (AI) 전처리 결과: " + content);
-
-            if (content == null || content.equals("null")) {
-                System.out.println("\t\t[PreprocessService] (AI) 마약 관련 홍보글이 아닙니다!");
+                System.out.println("\t\t[PreprocessService] HTML 전처리(AI) 실패: " + response.getStatusCode());
             } else {
-                System.out.println("\t\t[PreprocessService] (AI) 마약 관련 홍보글입니다!");
-                String savedId = saveData(html, url, title, source, content, telegrams); // 저장
-                System.out.println("\t\t[PreprocessService] (AI) " + url + " saved");
+                PreprocessResponse responseDto = response.getBody();
 
-                getChannelInfo(telegrams, savedId);
+                Boolean classificationResult = responseDto.getClassificationResult();
+                String content = responseDto.getPromotionContent();
+                List<String> telegrams = responseDto.getTelegrams();
+
+                System.out.println("\t\t[PreprocessService] (AI) 전처리 결과: " + content);
+
+                if (!classificationResult) {
+                    System.out.println("\t\t[PreprocessService] (AI) 마약 관련 홍보글이 아닙니다!");
+                } else {
+                    System.out.println("\t\t[PreprocessService] (AI) 마약 관련 홍보글입니다!");
+                    String savedId = saveData(html, url, title, source, content, telegrams); // 저장
+                    System.out.println("\t\t[PreprocessService] (AI) " + url + " saved");
+
+                    getChannelInfo(telegrams, savedId);
+                }
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("\t\t[PreprocessService] (AI) HTML 전처리 중 오류 발생: " + e.getMessage(), e);
+            System.out.println("\t\t[PreprocessService] (AI) HTML 전처리 중 오류 발생: " + e.getMessage());
         }
     }
 }

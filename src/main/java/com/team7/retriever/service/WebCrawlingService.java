@@ -2,8 +2,11 @@ package com.team7.retriever.service;
 
 // import com.team7.retriever.dto.CrawlGoogleResponse;
 import com.team7.retriever.dto.SerpApiCrawlingResponse;
+import com.team7.retriever.dto.WebCrawlingRequest;
+import com.team7.retriever.dto.WebCrawlingResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -52,7 +55,6 @@ public class WebCrawlingService {
     // initialDelay = 5000 -> 초기 5초 지연 시간 설정 -> 스케줄 안에 같이 넣는 것 (참고 용으로 기록)
     // @Scheduled(fixedDelay = 120000) // 테스트 용 - 한 사이클 종료 후 2분 지연 실행
     // @Scheduled(cron = "0 0 5 * * *") // 매일 오전 5시마다 실행
-    /*
     @Scheduled(cron = "0 0 5 * * MON-SAT") // 매주 월-토 오전 5시마다 실행
     public void webCrawling() {
         String api = "http://127.0.0.1:5000/crawl/links";
@@ -87,7 +89,8 @@ public class WebCrawlingService {
                             log.info("[WebCrawlingService] 내용 추출 완료");
                             // System.out.println("\t\t- " + html);
                             // log.debug("\t\t- " + html);
-                            preprocessService.htmlPreprocess(googleResponse, html); // 전처리 실행
+                            // preprocessService.htmlPreprocess(googleResponse, null, null, html); // 전처리 실행
+                            preprocessService.htmlPreprocessAi(googleResponse, null, null, html); // AI 사용 전처리 실행
                             log.info("[WebCrawlingService] 전처리 모듈 실행 완료");
                         } else {
                             log.error("[WebCrawlingService] 내용 추출 실패");
@@ -124,48 +127,30 @@ public class WebCrawlingService {
         }
 
     }
-    */
-
-    /*
-    public URI buildUri(String baseUrl) {
-        List<String> argotList = argotsService.getAllArgotsToList();
-
-        List<String> queries = new ArrayList<>();
-        for (String argot : argotList) {
-            queries.add("t.me " + argot);
-            // queries.add("텔레 " + argot);
-            // queries.add(argot + " 팝니다");
-        }
-        int maxResults = 5;
-
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(baseUrl)
-                .queryParam("max_results", maxResults);
-
-        for (String query : queries) {
-            uriBuilder.queryParam("q", query);
-        }
-
-        return uriBuilder.build(true).toUri();
-    }
-     */
 
     // SeapAPI Web Link Crawling
     @Scheduled(cron = "0 0 5 * * MON-SAT") // 매주 월-토 오전 5시마다 실행
     public void webCrawlingSerpApi() {
         String baseApi = "http://127.0.0.1:5000/crawl/links/serpapi";
 
-        // URI api = buildUri(baseApi);
-
         List<String> argotList = argotsService.getAllArgotsToList();
         int max_results = 10;
 
         StringBuilder queryStringBuilder = new StringBuilder();
         for (String argot : argotList) {
-            // String encoded = URLEncoder.encode("텔레 " + argot, StandardCharsets.UTF_8).replace("+", "%20");
-            String encoded = URLEncoder.encode("t.me " + argot, StandardCharsets.UTF_8).replace("+", "%20");
-            // String encoded = URLEncoder.encode(argot + " 팝니다", StandardCharsets.UTF_8).replace("+", "%20");
-            queryStringBuilder.append("q=").append(encoded).append("&");
+            String rawQuery = "t.me " + argot;
+            queryStringBuilder.append("q=").append(rawQuery).append("&");
         }
+        /*
+        for (String argot : argotList) {
+            String rawQuery = "텔레 " + argot;
+            queryStringBuilder.append("q=").append(rawQuery).append("&");
+        }
+        for (String argot : argotList) {
+            String rawQuery = argot + " 팝니다";
+            queryStringBuilder.append("q=").append(rawQuery).append("&");
+        }
+        */
         queryStringBuilder.append("max_results=").append(max_results);
 
         String finalQueryString = queryStringBuilder.toString();

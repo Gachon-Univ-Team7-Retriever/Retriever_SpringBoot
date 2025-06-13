@@ -2,6 +2,7 @@ package com.team7.retriever.controller;
 
 import com.team7.retriever.entity.Reports;
 import com.team7.retriever.service.ReportsService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/report")
 public class ReportsController {
     private final ReportsService reportsService;
-    public ReportsController(ReportsService reportsService) { this.reportsService = reportsService; }
 
     // 전체 조회
     @GetMapping("/all")

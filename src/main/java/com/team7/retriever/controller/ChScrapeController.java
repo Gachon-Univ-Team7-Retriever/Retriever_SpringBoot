@@ -1,17 +1,13 @@
 package com.team7.retriever.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team7.retriever.service.ChScrapeService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 public class ChScrapeController {
     private final ChScrapeService chScrapeService;
-
-    public ChScrapeController(ChScrapeService chScrapeService) {
-        this.chScrapeService = chScrapeService;
-    }
 
     @GetMapping("/telegram/channel/scrape")
     public void channelScrape(@RequestParam String channel) {

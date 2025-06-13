@@ -15,6 +15,7 @@ public class UpdateCheckService {
     private final PostsService postsService;
     private final HtmlCrawlingService htmlCrawlingService;
     private final PreprocessService preprocessService;
+    private final PostSimilarityService postSimilarityService;
 
     public void updateAllPost() {
         List<UpdateCheckRequest> allPosts = postsService.getAllPostsForUpdate();
@@ -32,11 +33,16 @@ public class UpdateCheckService {
         log.info("[UpDateCheckService] 크롤링 시작 / link: " + link);
         String newHtml = htmlCrawlingService.crawlHtml(link);
         if (newHtml != null) {
-            System.out.println("[UpDateCheckService] 내용 추출 완료");
+            log.info("[UpDateCheckService] 내용 추출 완료");
             preprocessService.updatePreprocess(newHtml, link, title, source);
-            System.out.println("[UpDateCheckService] 실행 완료");
+            log.info("[UpDateCheckService] 실행 완료");
+
+            // 유사도 모듈 실행 서비스
+            log.info("[WebCrawlingService] 유사도 모듈 호출");
+            postSimilarityService.calculateSimilarity();
+            log.info("[WebCrawlingService] 실행 완료");
         } else {
-            System.out.println("[UpDateCheckService] HTML 크롤링 결과 없음");
+            log.info("[UpDateCheckService] HTML 크롤링 결과 없음");
         }
     }
 }

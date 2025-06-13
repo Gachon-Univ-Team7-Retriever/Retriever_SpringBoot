@@ -3,17 +3,17 @@ package com.team7.retriever.controller;
 import com.team7.retriever.dto.ChatArgotDrugDTO;
 import com.team7.retriever.entity.ChData;
 import com.team7.retriever.service.ChDataService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/chat")
 public class ChDataController {
 
-    @Autowired
-    private ChDataService chDataService;
+    private final ChDataService chDataService;
 
     // 전체 채팅 조회
     @GetMapping("/all")

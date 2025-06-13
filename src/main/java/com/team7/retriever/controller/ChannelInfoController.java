@@ -1,22 +1,18 @@
 package com.team7.retriever.controller;
 
+import com.team7.retriever.dto.ChannelInfoRequest;
 import com.team7.retriever.service.ChannelInfoService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/channelInfo")
 public class ChannelInfoController {
     private final ChannelInfoService channelInfoService;
 
-    public ChannelInfoController(ChannelInfoService channelInfoService) {
-        this.channelInfoService = channelInfoService;
-    }
-
     @GetMapping
-    public void getChannelInfo(@RequestParam String token, @RequestParam String postId) {
-        channelInfoService.getChannelInfo(token, postId);
+    public void getChannelInfo(@RequestBody ChannelInfoRequest request) {
+        channelInfoService.getChannelInfo(request.getChannelKey(), request.getPostId());
     }
 }

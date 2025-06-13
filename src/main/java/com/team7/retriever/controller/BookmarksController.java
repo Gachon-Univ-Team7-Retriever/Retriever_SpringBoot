@@ -4,7 +4,7 @@ import com.team7.retriever.dto.BookmarksRequest;
 import com.team7.retriever.entity.Bookmarks;
 import com.team7.retriever.service.BookmarksService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/bookmarks")
 public class BookmarksController {
 
     private final BookmarksService BookmarksService;
-
-    @Autowired
-    public BookmarksController(BookmarksService BookmarksService) {
-        this.BookmarksService = BookmarksService;
-    }
 
     // 모든 북마크 조회
     @GetMapping("/all") /* 241231 수정 */

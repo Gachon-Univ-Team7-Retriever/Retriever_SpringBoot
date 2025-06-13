@@ -5,20 +5,19 @@ import com.team7.retriever.dto.UpdateCheckRequest;
 import com.team7.retriever.service.PostsService;
 import com.team7.retriever.service.PreprocessService;
 import com.team7.retriever.service.UpdateCheckService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/post-update")
 public class UpdateCheckController {
-    @Autowired
-    PostsService postsService;
-    @Autowired
-    private PreprocessService preprocessService;
-    @Autowired
-    private UpdateCheckService updateCheckService;
+    private final PostsService postsService;
+    private final PreprocessService preprocessService;
+    private final UpdateCheckService updateCheckService;
 
     // DB 데이터 조회 결과 테스트
     @GetMapping("/posts")
