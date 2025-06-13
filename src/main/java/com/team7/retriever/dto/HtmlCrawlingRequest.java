@@ -1,13 +1,13 @@
 package com.team7.retriever.dto;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
 public class HtmlCrawlingRequest {
     private String link;
 
-    public String link() {
-        return link;
-    }
-
-    public void setLink(String link) {
-        this.link = link;
-    }
 }

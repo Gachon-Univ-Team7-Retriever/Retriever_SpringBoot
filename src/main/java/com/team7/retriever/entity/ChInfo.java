@@ -2,22 +2,20 @@ package com.team7.retriever.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Getter
-@Setter
 @Document(collection = "channel_info")
 public class ChInfo {
     @Id
-    @Field("_id")
-    private long _id;
-//    @Field("id")
-//    private long id;
+    private Long id;
     private String title;
     private String username;
     private Boolean restricted;
@@ -31,5 +29,13 @@ public class ChInfo {
     private LocalDateTime chatbotUpdatedAt;
     private int promoCount; // 일단 보류
     private String status;
+    private Catalogs catalog;
+
+    @Getter
+    public static class Catalogs {
+        @Field("chatIds")
+        private List<Integer> chatIds;
+        private String description;
+    }
 
 }

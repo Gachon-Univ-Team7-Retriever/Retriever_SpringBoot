@@ -1,5 +1,6 @@
 package com.team7.retriever.service;
 
+import com.team7.retriever.dto.UpdateCheckRequest;
 import com.team7.retriever.entity.Posts;
 import com.team7.retriever.repository.PostsRepository;
 
@@ -77,11 +78,29 @@ public class PostsService {
     // 게시글 링크로 조회
     public List<Posts> getPostsByLink(String link) { return postsRepository.findByLink(link, Sort.by(Sort.Order.asc("createdAt"))); }
 
+    /*
     // 전체 데이터 조회 + 삭제되지 않은 게시글만 필터링 + 링크만 반환
     public List<String> getAllPostsForUpdate() {
         return postsRepository.findAll().stream()
                 .filter(post -> !post.isDeleted())
                 .map(Posts::getLink)
                 .toList();
+    }
+
+     */
+
+    public List<UpdateCheckRequest> getAllPostsForUpdate() {
+        return postsRepository.findAll().stream()
+                .filter(post -> !post.isDeleted())
+                .map(post -> new UpdateCheckRequest(
+                        post.getLink(),
+                        post.getTitle(),
+                        post.getSource()
+                ))
+                .toList();
+    }
+
+    public void addChannelId(Posts post) {
+        postsRepository.save(post);
     }
 }

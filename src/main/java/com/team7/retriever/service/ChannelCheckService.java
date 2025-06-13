@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
+// 모듈 변경으로 현재 사용되지 않는 코드
 
+/*
 @Service
 public class ChannelCheckService {
     private final RestTemplate restTemplate;
@@ -44,14 +46,13 @@ public class ChannelCheckService {
         // 모듈에서 전체 데이터 저장해주든지 하는 방식으로 수정해야 할 것 같음
 
         chInfo = new ChInfo();
-        /*
-        chInfo.setId(channel);
-        chInfo.setName(channel);
-        chInfo.setLink("t.me/"+channel);
-        chInfo.setCreatedAt(now);
-        chInfo.setUpdatedAt(now);
 
-         */
+//        chInfo.setId(channel);
+//        chInfo.setName(channel);
+//        chInfo.setLink("t.me/"+channel);
+//        chInfo.setCreatedAt(now);
+//        chInfo.setUpdatedAt(now);
+
 
         if (suspicious != null) {
             if (suspicious.equals("true")) {
@@ -73,3 +74,4 @@ public class ChannelCheckService {
         return response.getBody();
     }
 }
+*/

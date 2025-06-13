@@ -3,7 +3,7 @@ package com.team7.retriever.controller;
 
 import com.team7.retriever.entity.PostSimilarity;
 import com.team7.retriever.service.PostSimilarityService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,15 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/post-similarity")
 public class PostSimilarityController {
 
-    @Autowired
-    private PostSimilarityService postSimilarityService;
-
-    public PostSimilarityController(PostSimilarityService service) {
-        this.postSimilarityService = service;
-    }
+    private final PostSimilarityService postSimilarityService;
 
     // 전체 조회
     @GetMapping("/all")

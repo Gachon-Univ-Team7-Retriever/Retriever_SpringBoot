@@ -3,7 +3,7 @@ package com.team7.retriever.controller;
 
 import com.team7.retriever.entity.Drugs;
 import com.team7.retriever.service.DrugsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/drugs")
 public class DrugsController {
 
-    @Autowired
-    private DrugsService drugsService;
+    private final DrugsService drugsService;
 
     // 아이디로 조회
     @GetMapping("/id/{id}") /* 241231 수정 */

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChannelSimilarityRepository extends MongoRepository<ChannelSimilarity, String> {
-    ChannelSimilarity findByChannelId(String channelId);
+    ChannelSimilarity findByChannelId(long channelId);
 }

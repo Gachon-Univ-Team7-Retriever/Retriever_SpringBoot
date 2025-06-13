@@ -34,8 +34,8 @@ public class ChData {
     public static class senderInfo {
         private String type;
         private String name;
-        @Field("id")
-        private long id;
+        @Field("senderId")
+        private long senderId;
     }
 
     @Getter

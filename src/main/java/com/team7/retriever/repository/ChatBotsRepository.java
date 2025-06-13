@@ -10,8 +10,8 @@ import java.util.Optional;
 @Repository
 public interface ChatBotsRepository extends MongoRepository<ChatBots, String> {
     // id
-    Optional<ChatBots> findById(String id);
+    Optional<ChatBots> findById(long id);
 
-    // channel id
-    List<ChatBots> findByChannelId(int channelId);
+    // channels
+    List<ChatBots> findByChannelsIn(List<Long> channelIds);
 }

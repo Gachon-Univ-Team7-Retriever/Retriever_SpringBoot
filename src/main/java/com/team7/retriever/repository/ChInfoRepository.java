@@ -10,14 +10,16 @@ import java.util.Optional;
 
 @Repository
 public interface ChInfoRepository extends MongoRepository<ChInfo, String> {
+
+    Optional<ChInfo> findById(long id);
     
     // 채널 링크로 조회
     Optional<ChInfo> findByLink(String link);
 
     /* 250102 추가 */
     // 채널 이름에 포함 (대소문자 무시)
-    @Query("{ 'name': { $regex: ?0, $options: 'i' } }")
-    List<ChInfo> findByNameContaining(String name);
+    @Query("{ 'title': { $regex: ?0, $options: 'i' } }")
+    List<ChInfo> findByTitleContaining(String title);
 
     boolean existsById(String id);
 }

@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Document(collection = "chat_bots")
+@Document(collection = "chat_bot")
 public class ChatBots {
     @Id
-    private String id;
-    private long channelId;
+    private long id;
+    private List<Long> channels;
     private LocalDateTime updatedAt;
-    private List<Integer> chatIds = new ArrayList<>();
-
+    private List<String> chats;
+    private String scope;
 }

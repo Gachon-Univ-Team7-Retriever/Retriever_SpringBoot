@@ -1,0 +1,24 @@
+# Application name
+spring.application.name=retriever
+
+# MongoDB - local
+#spring.data.mongodb.host=<your-mongo-host>
+#spring.data.mongodb.port=<your-mongo-port>
+#spring.data.mongodb.database=<your-mongo-db>
+
+# MongoDB - team
+spring.data.mongodb.uri=mongodb+srv://<username>:<password>@<cluster-url>/<dbname>?retryWrites=true&w=majority
+spring.data.mongodb.database=<your-team-db>
+spring.data.mongodb.authentication-database=admin
+spring.data.mongodb.username=<your-username>
+spring.data.mongodb.password=<your-password>
+
+# Neo4j - local
+spring.neo4j.uri=bolt://<your-neo4j-host>:<your-neo4j-port>
+spring.neo4j.authentication.username=<your-username>
+spring.neo4j.authentication.password=<your-password>
+
+
+# Logging
+logging.level.org.springframework.data.mongodb.core.MongoTemplate=DEBUG
+logging.level.org.mongodb.driver=DEBUG
