@@ -21,8 +21,8 @@ public class ChScrapeService {
 
     // 스케줄 1 에서 실행되는 메서드 (channelInfo -> channelScrape)
     public void channelScrape(String channelKey) {
-        // String infoAPI = "http://127.0.0.1:5000/telegram/channel/info";
-        String api = "http://127.0.0.1:5000/telegram/channel/scrape";
+        // String infoAPI = "http://127.0.0.1:5050/telegram/channel/info";
+        String api = "http://127.0.0.1:5050/telegram/channel/scrape";
 
         Map<String, String> requestBody = Map.of("channel_key", channelKey);
         log.debug("\t\t\t\t[ChScrapeService] channel_key: " + channelKey);

@@ -57,7 +57,7 @@ public class WebCrawlingService {
     // @Scheduled(cron = "0 0 5 * * *") // 매일 오전 5시마다 실행
     @Scheduled(cron = "0 0 5 * * MON-SAT") // 매주 월-토 오전 5시마다 실행
     public void webCrawling() {
-        String api = "http://127.0.0.1:5000/crawl/links";
+        String api = "http://127.0.0.1:5050/crawl/links";
 
         WebCrawlingRequest webCrawlingRequest = new WebCrawlingRequest();
         webCrawlingRequest.setQueries(argotsService.getAllArgotsToListWtme());
@@ -131,7 +131,7 @@ public class WebCrawlingService {
     // SeapAPI Web Link Crawling
     @Scheduled(cron = "0 0 5 * * MON-SAT") // 매주 월-토 오전 5시마다 실행
     public void webCrawlingSerpApi() {
-        String baseApi = "http://127.0.0.1:5000/crawl/links/serpapi";
+        String baseApi = "http://127.0.0.1:5050/crawl/links/serpapi";
 
         List<String> argotList = argotsService.getAllArgotsToList();
         int max_results = 10;

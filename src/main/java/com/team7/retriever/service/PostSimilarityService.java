@@ -56,8 +56,8 @@ public class PostSimilarityService {
     public void calculateSimilarity() {
         System.out.println("[PostSimilarityService] API 호출");
         log.info("[PostSimilarityService] API 호출");
-        String api1 = "http://127.0.0.1:5000/cluster/post_update";
-        String api2 = "http://127.0.0.1:5000/cluster/post_cluster";
+        String api1 = "http://127.0.0.1:5050/cluster/post_preprocess";
+        String api2 = "http://127.0.0.1:5050/cluster/post_cluster";
 
         ResponseEntity<Map> response = restTemplate.postForEntity(api1, null, Map.class);
 
@@ -70,7 +70,7 @@ public class PostSimilarityService {
         }
         System.out.println("[PostSimilarityService] 실행 완료");
 
-        ResponseEntity<Map> response2 = restTemplate.postForEntity(api1, null, Map.class);
+        ResponseEntity<Map> response2 = restTemplate.postForEntity(api2, null, Map.class);
 
         if (response2.getStatusCode().is2xxSuccessful() && response2.getBody() != null) {
             String message = response2.getBody().get("message").toString();
