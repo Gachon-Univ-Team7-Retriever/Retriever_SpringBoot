@@ -36,7 +36,7 @@ public class PreprocessService {
 
     // 스케줄 2 - 데이터 업데이트
     public String updatePreprocess(String html, String link, String title, String source) {
-        String api = "http://127.0.0.1:5000/preprocess/extract/web-promotion";
+        String api = "http://127.0.0.1:5050/preprocess/extract/web-promotion";
 
         Map<String, String> requestBody = Map.of("html", html);
         ResponseEntity<String> response = restTemplate.postForEntity(api, requestBody, String.class);
@@ -180,7 +180,7 @@ public class PreprocessService {
     //  2.1. 해당 채널이 DB에 있으면 홍보글 개수 업데이트
     //  2.2. 없으면 검문 서비스 호출
     public void htmlPreprocess(String url, String title, String source, String html) {
-        String api = "http://127.0.0.1:5000/preprocess/extract/web-promotion";
+        String api = "http://127.0.0.1:5050/preprocess/extract/web-promotion";
 
         Map<String, String> requestBody = Map.of("html", html);
         // System.out.println("[DEBUG] HTML Preprocess RequestBody");
@@ -221,7 +221,7 @@ public class PreprocessService {
     }
 
     public void htmlPreprocessAi(String url, String title, String source, String html) {
-        String api = "http://127.0.0.1:5000//preprocess/extract/web-promotion/openai";
+        String api = "http://127.0.0.1:5050//preprocess/extract/web-promotion/openai";
 
         Map<String, String> requestBody = Map.of("html", html);
 

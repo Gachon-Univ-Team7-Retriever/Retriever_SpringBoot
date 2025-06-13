@@ -27,7 +27,7 @@ public class ChannelCheckService {
     }
 
     public ChannelCheckResponse checkChannel(String channel) {
-        String api = "http://127.0.0.1:5000/telegram/channel/check-suspicious";
+        String api = "http://127.0.0.1:5050/telegram/channel/check-suspicious";
         Map<String, String> requestBody = Map.of("channel_name", channel);
         // ResponseEntity<Boolean> response = restTemplate.postForEntity(api, requestBody, Boolean.class);
         ResponseEntity<ChannelCheckResponse> response = restTemplate.postForEntity(api, requestBody, ChannelCheckResponse.class);

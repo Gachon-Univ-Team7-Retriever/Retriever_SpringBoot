@@ -28,7 +28,7 @@ public class ChannelInfoService {
     // 채널 정보 수집 모듈 호출하는 메서드
 
     public ChannelInfoResponse getChannelInfo(String inviteToken, String savedPostId) {
-        String api = "http://127.0.0.1:5000/telegram/channel/info";
+        String api = "http://127.0.0.1:5050/telegram/channel/info";
         Map<String, String> requestBody = Map.of("channel_key", inviteToken);
         System.out.println("\t\t\t[ChannelInfoService] inviteToken: " + inviteToken);
 

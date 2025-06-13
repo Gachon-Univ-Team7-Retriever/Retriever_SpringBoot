@@ -28,7 +28,7 @@ public class HtmlCrawlingService {
     }
 
     public String crawlHtml(String link) {
-        String api = "http://127.0.0.1:5000/crawl/html";
+        String api = "http://127.0.0.1:5050/crawl/html";
         // ResponseEntity<String> response = restTemplate.postForEntity(api, link, String.class);
         Map<String, String> requestBody = Map.of("link", link);
         try {
