@@ -18,7 +18,7 @@ public class WebCrawlingController {
 
     // DB에서 데이터 받아서 실행
     // 기존 웹크롤링
-    @GetMapping()
+    @GetMapping("pre")
     public void webCrawling() {
         webCrawlingService.webCrawling();
     }
