@@ -14,7 +14,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Node("Posts")
+@Node("Post")
 public class Posts {
 
     @Id

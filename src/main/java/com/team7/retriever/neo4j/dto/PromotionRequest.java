@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PromotionRequest {
-    private Long channelId;
+    private Long id;
     private String postId;
 }

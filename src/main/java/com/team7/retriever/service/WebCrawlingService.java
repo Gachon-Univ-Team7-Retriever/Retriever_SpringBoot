@@ -134,7 +134,7 @@ public class WebCrawlingService {
         String baseApi = "http://127.0.0.1:5050/crawl/links/serpapi";
 
         List<String> argotList = argotsService.getAllArgotsToList();
-        int max_results = 10;
+        int max_results = 5;
 
         StringBuilder queryStringBuilder = new StringBuilder();
         for (String argot : argotList) {
@@ -146,11 +146,14 @@ public class WebCrawlingService {
             String rawQuery = "텔레 " + argot;
             queryStringBuilder.append("q=").append(rawQuery).append("&");
         }
+        */
+        /*
         for (String argot : argotList) {
             String rawQuery = argot + " 팝니다";
             queryStringBuilder.append("q=").append(rawQuery).append("&");
         }
         */
+
         queryStringBuilder.append("max_results=").append(max_results);
 
         String finalQueryString = queryStringBuilder.toString();
@@ -196,6 +199,7 @@ public class WebCrawlingService {
                     log.info("[WebCrawlingService] 크롤링 실행 완료");
 
                 }
+                log.info("[WebCrawlingService] Google 처리 완료");
                 // 유사도 모듈 실행 서비스
                 log.info("[WebCrawlingService] 유사도 모듈 호출");
                 postSimilarityService.calculateSimilarity();
@@ -218,6 +222,7 @@ public class WebCrawlingService {
                         log.info("[WebCrawlingService] 채널 정보 수집 완료");
                     }
                 }
+                log.info("[WebCrawlingService] Telegrams 처리 완료");
             } else {
                 log.warn("[WebCrawlingService] No telegram found");
             }

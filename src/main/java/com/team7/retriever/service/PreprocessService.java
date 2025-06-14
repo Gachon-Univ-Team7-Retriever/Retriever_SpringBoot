@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team7.retriever.dto.PreprocessResponse;
 import com.team7.retriever.entity.Posts;
 import com.team7.retriever.repository.PostsRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class PreprocessService {
     private final RestTemplate restTemplate;
     private final PostsRepository postsRepository;
@@ -23,16 +25,6 @@ public class PreprocessService {
     private final HtmlCrawlingService htmlCrawlingService;
     private final ChInfoService chInfoService;
     private final ChannelInfoService channelInfoService;
-
-    public PreprocessService(RestTemplate restTemplate, PostsRepository postsRepository, PostsService postsService, ObjectMapper objectMapper, HtmlCrawlingService htmlCrawlingService, ChInfoService chInfoService, ChannelInfoService channelInfoService) {
-        this.restTemplate = restTemplate;
-        this.postsRepository = postsRepository;
-        this.postsService = postsService;
-        this.objectMapper = objectMapper;
-        this.htmlCrawlingService = htmlCrawlingService;
-        this.chInfoService = chInfoService;
-        this.channelInfoService = channelInfoService;
-    }
 
     // 스케줄 2 - 데이터 업데이트
     public String updatePreprocess(String html, String link, String title, String source) {
@@ -137,7 +129,7 @@ public class PreprocessService {
                 .siteName(extractDomain(link))
                 .title(title)
                 .content(content)
-                .promoSiteLink(List.of(telegrams.toString())) // or List.copyOf(telegrams) ?
+                .promoSiteLink(List.copyOf(telegrams))
                 .promoChannelId(null) // 채널 정보 수집 후에 저장됨
                 .author(null) // X
                 .timestamp(null) // X
