@@ -17,7 +17,7 @@ public class SavingController {
 
     @PostMapping("/relation")
     public ResponseEntity<String> createPromotionRelation(@RequestBody PromotionRequest request) {
-        savingPromotionService.createPromotionRelation(request.getChannelId(), request.getPostId());
+        savingPromotionService.createPromotionRelation(request.getId(), request.getPostId());
         return ResponseEntity.ok("홍보 관계 생성 실행 완료");
     }
 }

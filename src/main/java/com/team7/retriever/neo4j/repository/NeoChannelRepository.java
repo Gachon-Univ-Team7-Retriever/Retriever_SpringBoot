@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface NeoChannelRepository extends Neo4jRepository<Channel, Long> {
 
-    Optional<Channel> findByChannelId(Long channelId);
+    Optional<Channel> findById(Long channelId);
 
 }
 
