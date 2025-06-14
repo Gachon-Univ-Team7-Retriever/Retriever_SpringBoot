@@ -17,8 +17,3 @@ spring.data.mongodb.password=<your-password>
 spring.neo4j.uri=bolt://<your-neo4j-host>:<your-neo4j-port>
 spring.neo4j.authentication.username=<your-username>
 spring.neo4j.authentication.password=<your-password>
-
-
-# Logging
-logging.level.org.springframework.data.mongodb.core.MongoTemplate=DEBUG
-logging.level.org.mongodb.driver=DEBUG

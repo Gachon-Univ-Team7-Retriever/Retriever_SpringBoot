@@ -8,6 +8,8 @@ build/
 /src/main/resources/application.properties
 !/src/main/resources/application.properties.example
 
+logs/
+
 ### STS ###
 .apt_generated
 .classpath
