@@ -1,14 +1,11 @@
 package com.team7.retriever.entity;
 
 import lombok.Getter;
-import lombok.Setter;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -29,10 +26,10 @@ public class ChInfo {
     private LocalDateTime chatbotUpdatedAt;
     private int promoCount; // 일단 보류
     private String status;
-    private Catalogs catalog;
+    private Catalog catalog;
 
     @Getter
-    public static class Catalogs {
+    public static class Catalog {
         @Field("chatIds")
         private List<Integer> chatIds;
         private String description;

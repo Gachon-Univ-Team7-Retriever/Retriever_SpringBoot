@@ -1,8 +1,6 @@
 package com.team7.retriever.entity;
 
 import lombok.Getter;
-import org.bson.types.ObjectId;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -21,17 +19,17 @@ public class ChData {
     private long channelId;
     private LocalDateTime timestamp;
     private String text;
-    private senderInfo sender;
+    private SenderInfo sender;
     private Integer views; // *** null 일 수도 있는 값은 primitive -> Wrapper ***
     private String url;
     @Field("id")
     private int id;
-    private media media;
+    private Media media;
     private List<String> argot;
     private List<String> drugs;
 
     @Getter
-    public static class senderInfo {
+    public static class SenderInfo {
         private String type;
         private String name;
         @Field("senderId")
@@ -39,7 +37,7 @@ public class ChData {
     }
 
     @Getter
-    public static class media {
+    public static class Media {
         private String url;
         private String type;
     }
