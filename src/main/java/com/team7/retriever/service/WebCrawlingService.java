@@ -134,7 +134,7 @@ public class WebCrawlingService {
         String baseApi = "http://127.0.0.1:5050/crawl/links/serpapi";
 
         List<String> argotList = argotsService.getAllArgotsToList();
-        int max_results = 3;
+        int max_results = 10;
 
         StringBuilder queryStringBuilder = new StringBuilder();
         for (String argot : argotList) {
